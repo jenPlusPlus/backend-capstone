@@ -34,17 +34,45 @@ app.get('/', (request, response) => {
 
 // begin /users
 app.get('/api/v1/users', (request, response) => {
-  database('users').select()
-    .then(users => response.status(200).json({ users }))
-    .catch(error => response.status(500).json({ error }));
+  const queryParameter = Object.keys(request.query)[0];
+  const queryParameterValue = request.query[queryParameter];
+
+  if (!queryParameter) {
+    database('users').select()
+      .then(users => response.status(200).json({ users }))
+      .catch(error => response.status(500).json({ error }));
+  } else {
+    database('users').where(queryParameter.toLowerCase(), queryParameterValue.toLowerCase()).select()
+      .then(users => {
+        if (!users.length) {
+          return response.status(404).json({ error: `Could not find any users associated with '${queryParameter}' of '${queryParameterValue}'` });
+        }
+        return response.status(200).json({ users });
+      })
+      .catch(error => response.status(500).json({ error }));
+  }
 });
 // end /users
 
 // begin /professionals
 app.get('/api/v1/professionals', (request, response) => {
-  database('professionals').select()
-    .then(professionals => response.status(200).json({ professionals }))
-    .catch(error => response.status(500).json({ error }));
+  const queryParameter = Object.keys(request.query)[0];
+  const queryParameterValue = request.query[queryParameter];
+
+  if (!queryParameter) {
+    database('professionals').select()
+      .then(professionals => response.status(200).json({ professionals }))
+      .catch(error => response.status(500).json({ error }));
+  } else {
+    database('professionals').where(queryParameter.toLowerCase(), queryParameterValue.toLowerCase()).select()
+      .then(professionals => {
+        if (!professionals.length) {
+          return response.status(404).json({ error: `Could not find any professionals associated with '${queryParameter}' of '${queryParameterValue}'` });
+        }
+        return response.status(200).json({ professionals });
+      })
+      .catch(error => response.status(500).json({ error }));
+  }
 });
 // end /professionals
 
