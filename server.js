@@ -111,7 +111,55 @@ app.get('/api/v1/users/:userID', (request, response) => {
     })
     .catch(error => response.status(500).json({ error }));
 });
+
+app.delete('api/v1/users/:userID', (request, response) => {
+  const userID = request.params.userID;
+
+  database('users').where('id', userID).del()
+    .then(() => response.status(204).json( { userID }))
+    .catch(() => response.status(404).json({ error: `Could not find user with id '${userID}'` }));
+});
 // end /users/:userID
+
+// begin /professionals/:professionalID
+app.delete('api/v1/professionals/:professionalID', (request, response) => {
+  const professionalID = request.params.professionalID;
+
+  database('professionals').where('id', professionalID).del()
+    .then(() => response.status(204).json( { professionalID }))
+    .catch(() => response.status(404).json({ error: `Could not find professional with id '${professionalID}'` }));
+});
+// end /professionals/:professionalID
+
+// begin /insuranceProviders/:insuranceProviderID
+app.delete('api/v1/insuranceProviders/:insuranceProviderID', (request, response) => {
+  const insuranceProviderID = request.params.insuranceProviderID;
+
+  database('insuranceProviders').where('id', insuranceProviderID).del()
+    .then(() => response.status(204).json( { insuranceProviderID }))
+    .catch(() => response.status(404).json({ error: `Could not find insurance provider with id '${insuranceProviderID}'` }));
+});
+// end /insuranceProviders/:insuranceProviderID
+
+// begin /specialties/:specialtyID
+app.delete('api/v1/specialties/:specialtyID', (request, response) => {
+  const specialtyID = request.params.specialtyID;
+
+  database('specialties').where('id', specialtyID).del()
+    .then(() => response.status(204).json( { specialtyID }))
+    .catch(() => response.status(404).json({ error: `Could not find specialty with id '${specialtyID}'` }));
+});
+// end /specialties/:specialtyID
+
+// begin /challenges/:challengeID
+app.delete('api/v1/challenges/:challengeID', (request, response) => {
+  const challengeID = request.params.challengeID;
+
+  database('challenges').where('id', challengeID).del()
+    .then(() => response.status(204).json( { challengeID }))
+    .catch(() => response.status(404).json({ error: `Could not find challenge with id '${challengeID}'` }));
+});
+// end /challenges/:challengeID
 
 // begin /favoriteUsers/:userID
 app.get('/api/v1/favoriteUsers/:userID', (request, response) => {
@@ -126,6 +174,20 @@ app.get('/api/v1/favoriteUsers/:userID', (request, response) => {
 });
 // end /favoriteUsers/:userID
 
+// begin /favoriteUsers/:userID/:favoriteUserID
+app.delete('/api/v1/favoriteUsers/:userID/:favoriteUserID', (request, response) => {
+  const userID = request.params.userID;
+  const favoriteUserID = request.params.favoriteUserID;
+
+  database('favorite_users').where({
+    user_id: userID,
+    favorite_user_id: favoriteUserID
+  }).del()
+    .then(() => response.status(204).json( { favoriteUserID }))
+    .catch(() => response.status(404).json({ error: `Could not find favorite user with id '${favoriteUserID}' for user id ${userID}` }));
+});
+// end /favoriteUsers/:userID/:favoriteUserID
+
 // begin /favoriteProfessionals/:userID
 app.get('/api/v1/favoriteProfessionals/:userID', (request, response) => {
   database('favorite_professionals').where('user_id', request.params.userID).select()
@@ -138,6 +200,20 @@ app.get('/api/v1/favoriteProfessionals/:userID', (request, response) => {
     .catch(error => response.status(500).json({ error }));
 });
 // end /favoriteProfessionals/:userID
+
+// begin /favoriteProfessionals/:userID/:favoriteProfessionalID
+app.delete('/api/v1/favoriteProfessionals/:userID/:favoriteProfessionalID', (request, response) => {
+  const userID = request.params.userID;
+  const favoriteProfessionalID = request.params.favoriteProfessionalID;
+
+  database('favorite_professionals').where({
+    user_id: userID,
+    favorite_professional_id: favoriteProfessionalID
+  }).del()
+    .then(() => response.status(204).json( { favoriteProfessionalID }))
+    .catch(() => response.status(404).json({ error: `Could not find favorite professional with id '${favoriteProfessionalID}' for user id ${userID}` }));
+});
+// end /favoriteProfessionals/:userID/:favoriteProfessionalID
 
 app.listen(app.get('port'), () => {
   // eslint-disable-next-line
