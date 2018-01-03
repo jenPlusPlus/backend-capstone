@@ -52,6 +52,50 @@ app.get('/api/v1/users', (request, response) => {
       .catch(error => response.status(500).json({ error }));
   }
 });
+
+app.post('/api/v1/users', async (request, response) => {
+  const { user_name, user_image, user_about, user_location, user_email, user_challenges } = request.body;
+  const user = { user_name, user_image, user_about, user_location, user_email };
+  let userID;
+  let userChallengeIDPromises;
+  let userChallengeIDs;
+
+  for (const requiredParameter of ['user_name', 'user_about', 'user_location, user_email']) {
+    if (!user[requiredParameter]) {
+      return response.status(422).json( { error: `You are missing the '${requiredParameter}' property` });
+    }
+  }
+
+  userChallengeIDPromises = user_challenges.map(challenge => {
+    return database('challenges').where('challenge_name', challenge).select()
+      .then(challenges => challenges.challenge_id)
+      .catch(error => response.status(500).json({ error }));
+  });
+
+  await Promise.all(userChallengeIDPromises)
+    .then(resolvedChallengeIDs => {
+      userChallengeIDs = resolvedChallengeIDs;
+    })
+    .catch(error => response.status(500).json({ error }));
+
+  database('users').insert(user, 'id')
+    .then(insertedUserID => {
+      userID = insertedUserID;
+      response.status(201).json({ id: insertedUserID });
+    })
+    .catch(error => response.status(500).json({ error }));
+
+  const userChallenges = userChallengeIDs.map(userChallengeID => {
+    return {
+      user_id: userID,
+      challenge_id: userChallengeID
+    };
+  });
+
+  database('user_challenges').insert(userChallenges)
+    .then(insertedUserChallenge => response.status(201).json({ userChallenge: insertedUserChallenge }))
+    .catch(error => response.status(500).json({ error }));
+});
 // end /users
 
 // begin /professionals
@@ -74,12 +118,97 @@ app.get('/api/v1/professionals', (request, response) => {
       .catch(error => response.status(500).json({ error }));
   }
 });
+
+app.post('/api/v1/professionals', async (request, response) => {
+  const { professional_name, professional_image, professional_location, professional_specialties, professional_insuranceProviders } = request.body;
+  const professional = { professional_name, professional_image, professional_location };
+  let profID;
+  let specialtyIDPromises;
+  let specialtyIDs;
+  let insuranceProviderIDPromises;
+  let insuranceProvidersIDs;
+
+  for (const requiredParameter of ['professional_name', 'professional_location', 'professional_specialties', 'professional_insuranceProviders']) {
+    if (!professional[requiredParameter]) {
+      return response.status(422).json( { error: `You are missing the '${requiredParameter}' property` });
+    }
+  }
+
+  specialtyIDPromises = professional_specialties.map(specialty => {
+    return database('specialties').where('specialty_name', specialty).select()
+      .then(specialties => specialties.specialty_id)
+      .catch(error => response.status(500).json({ error }));
+  });
+
+  await Promise.all(specialtyIDPromises)
+    .then(resolvedSpecialtyIDs => {
+      specialtyIDs = resolvedSpecialtyIDs;
+    })
+    .catch(error => response.status(500).json({ error }));
+
+  insuranceProviderIDPromises = professional_insuranceProviders.map(insuranceProvider => {
+    return database('insurance_providers').where('insuranceProvider_name', insuranceProvider).select()
+      .then(insuranceProviders => insuranceProviders.insuranceProvider_id)
+      .catch(error => response.status(500).json({ error }));
+  });
+
+  await Promise.all(insuranceProviderIDPromises)
+    .then(resolvedinsuranceProviderIDs => {
+      insuranceProvidersIDs = resolvedinsuranceProviderIDs;
+    })
+    .catch(error => response.status(500).json({ error }));
+
+  await database('professionals').insert(professional, 'id')
+    .then(insertedProfessionalID => {
+      profID = insertedProfessionalID;
+      return response.status(201).json({ id: insertedProfessionalID });
+    })
+    .catch(error => response.status(500).json({ error }));
+
+  const professionalSpecialties = specialtyIDs.map(specialtyID => {
+    return {
+      professional_id: profID,
+      specialty_id: specialtyID
+    };
+  });
+
+  database('professional_specialties').insert(professionalSpecialties)
+    .then(insertedProfessionalSpecialty => response.status(201).json({ professionalSpecialty: insertedProfessionalSpecialty }))
+    .catch(error => response.status(500).json({ error }));
+
+  const professionalInsuranceProviders = insuranceProvidersIDs.map(insuranceProviderID => {
+    return {
+      professional_id: profID,
+      insuranceProvider_id: insuranceProviderID
+    };
+  });
+
+  database('professional_insuranceProviders').insert(professionalInsuranceProviders)
+    .then(insertedProfessionalInsuranceProvider => response.status(201).json({ professionalInsuranceProvider: insertedProfessionalInsuranceProvider }))
+    .catch(error => response.status(500).json({ error }));
+
+});
 // end /professionals
 
 // begin /insuranceProviders
 app.get('/api/v1/insuranceProviders', (request, response) => {
   database('insuranceProviders').select()
     .then(insuranceProviders => response.status(200).json({ insuranceProviders }))
+    .catch(error => response.status(500).json({ error }));
+});
+
+app.post('/api/v1/insuranceProviders', (request, response) => {
+  const { insuranceProvider_name } = request.body;
+  const insuranceProvider = { insuranceProvider_name };
+
+  for (const requiredParameter of ['specialty_name']) {
+    if (!insuranceProvider[requiredParameter]) {
+      return response.status(422).json({ error: `You are missing the '${requiredParameter}' property` });
+    }
+  }
+
+  database('insuranceProviders').insert(insuranceProvider, 'id')
+    .then(insertedInsuranceProviderID => response.status(201).json({ id: insertedInsuranceProviderID }))
     .catch(error => response.status(500).json({ error }));
 });
 // end /insuranceProviders
@@ -90,12 +219,42 @@ app.get('/api/v1/specialties', (request, response) => {
     .then(specialties => response.status(200).json({ specialties }))
     .catch(error => response.status(500).json({ error }));
 });
+
+app.post('/api/v1/specialties', (request, response) => {
+  const { specialty_name } = request.body;
+  const specialty = { specialty_name };
+
+  for (const requiredParameter of ['specialty_name']) {
+    if (!specialty[requiredParameter]) {
+      return response.status(422).json({ error: `You are missing the '${requiredParameter}' property` });
+    }
+  }
+
+  database('specialties').insert(specialty, 'id')
+    .then(insertedSpecialtyID => response.status(201).json({ id: insertedSpecialtyID }))
+    .catch(error => response.status(500).json({ error }));
+});
 // end /specialties
 
 // begin /challenges
 app.get('/api/v1/challenges', (request, response) => {
   database('challenges').select()
     .then(challenges => response.status(200).json({ challenges }))
+    .catch(error => response.status(500).json({ error }));
+});
+
+app.post('/api/v1/challenges', (request, response) => {
+  const { challenge_name } = request.body;
+  const challenge = { challenge_name };
+
+  for (const requiredParameter of ['specialty_name']) {
+    if (!challenge[requiredParameter]) {
+      return response.status(422).json({ error: `You are missing the '${requiredParameter}' property` });
+    }
+  }
+
+  database('challenges').insert(challenge, 'id')
+    .then(insertedChallengeID => response.status(201).json({ id: insertedChallengeID }))
     .catch(error => response.status(500).json({ error }));
 });
 // end /challenges
@@ -172,6 +331,26 @@ app.get('/api/v1/favoriteUsers/:userID', (request, response) => {
     })
     .catch(error => response.status(500).json({ error }));
 });
+
+app.post('/api/v1/favoriteUsers/:userID', (request, response) => {
+  const { favoriteUserID } = request.body;
+  const favoriteUser = { favoriteUserID };
+
+  const { userID } = request.params;
+
+  for (const requiredParameter of ['favoriteUserID']) {
+    if (!favoriteUser[requiredParameter]) {
+      return response.status(422).json({ error: `You are missing the '${requiredParameter}' property` });
+    }
+  }
+
+  database('favorite_users').insert({
+    user_id: userID,
+    favorite_user_id: favoriteUserID
+  }, '*')
+    .then(insertedFavoriteUser => response.status(201).json({ favoriteUser: insertedFavoriteUser }))
+    .catch(error => response.status(500).json({ error }));
+});
 // end /favoriteUsers/:userID
 
 // begin /favoriteUsers/:userID/:favoriteUserID
@@ -197,6 +376,26 @@ app.get('/api/v1/favoriteProfessionals/:userID', (request, response) => {
       }
       return response.status(404).json({ error: `Could not find any favorite professionals for user id ${request.params.userID}.`});
     })
+    .catch(error => response.status(500).json({ error }));
+});
+
+app.post('/api/v1/favoriteProfessionals/:userID', (request, response) => {
+  const { favoriteProfessionalID } = request.body;
+  const favoriteProfessional = { favoriteProfessionalID };
+
+  const { userID } = request.params;
+
+  for (const requiredParameter of ['favoriteProfessionalID']) {
+    if (!favoriteProfessional[requiredParameter]) {
+      return response.status(422).json({ error: `You are missing the '${requiredParameter}' property` });
+    }
+  }
+
+  database('favorite_professionals').insert({
+    user_id: userID,
+    favorite_professional_id: favoriteProfessionalID
+  }, '*')
+    .then(insertedFavoriteProfessional => response.status(201).json({ favoriteProfessional: insertedFavoriteProfessional }))
     .catch(error => response.status(500).json({ error }));
 });
 // end /favoriteProfessionals/:userID
