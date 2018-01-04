@@ -3,6 +3,7 @@ const express = require('express');
 // const path = require('path');
 
 const app = express();
+require('express-async-await')(app);
 const bodyParser = require('body-parser');
 
 // set up for future use
@@ -38,11 +39,13 @@ app.get('/api/v1/users', (request, response) => {
   const queryParameterValue = request.query[queryParameter];
 
   if (!queryParameter) {
-    database('users').select()
+    database('users')
+      // .join('user_challenges', 'user_challenges.user_id', '=', 'users.id')
+      .select()
       .then(users => response.status(200).json({ users }))
       .catch(error => response.status(500).json({ error }));
   } else {
-    database('users').where(queryParameter.toLowerCase(), queryParameterValue.toLowerCase()).select()
+    database('users').where(queryParameter.toLowerCase(), queryParameterValue).select()
       .then(users => {
         if (!users.length) {
           return response.status(404).json({ error: `Could not find any users associated with '${queryParameter}' of '${queryParameterValue}'` });
@@ -53,7 +56,7 @@ app.get('/api/v1/users', (request, response) => {
   }
 });
 
-app.post('/api/v1/users', async (request, response) => {
+app.post('/api/v1/users', (request, response) => {
   const { user_name, user_image, user_about, user_location, user_email, user_challenges } = request.body;
   const user = { user_name, user_image, user_about, user_location, user_email };
   let userID;
@@ -72,7 +75,7 @@ app.post('/api/v1/users', async (request, response) => {
       .catch(error => response.status(500).json({ error }));
   });
 
-  await Promise.all(userChallengeIDPromises)
+  Promise.all(userChallengeIDPromises)
     .then(resolvedChallengeIDs => {
       userChallengeIDs = resolvedChallengeIDs;
     })
@@ -108,7 +111,7 @@ app.get('/api/v1/professionals', (request, response) => {
       .then(professionals => response.status(200).json({ professionals }))
       .catch(error => response.status(500).json({ error }));
   } else {
-    database('professionals').where(queryParameter.toLowerCase(), queryParameterValue.toLowerCase()).select()
+    database('professionals').where(queryParameter.toLowerCase(), queryParameterValue).select()
       .then(professionals => {
         if (!professionals.length) {
           return response.status(404).json({ error: `Could not find any professionals associated with '${queryParameter}' of '${queryParameterValue}'` });
@@ -119,7 +122,7 @@ app.get('/api/v1/professionals', (request, response) => {
   }
 });
 
-app.post('/api/v1/professionals', async (request, response) => {
+app.post('/api/v1/professionals', (request, response) => {
   const { professional_name, professional_image, professional_location, professional_specialties, professional_insuranceProviders } = request.body;
   const professional = { professional_name, professional_image, professional_location };
   let profID;
@@ -140,7 +143,7 @@ app.post('/api/v1/professionals', async (request, response) => {
       .catch(error => response.status(500).json({ error }));
   });
 
-  await Promise.all(specialtyIDPromises)
+  Promise.all(specialtyIDPromises)
     .then(resolvedSpecialtyIDs => {
       specialtyIDs = resolvedSpecialtyIDs;
     })
@@ -152,13 +155,13 @@ app.post('/api/v1/professionals', async (request, response) => {
       .catch(error => response.status(500).json({ error }));
   });
 
-  await Promise.all(insuranceProviderIDPromises)
+  Promise.all(insuranceProviderIDPromises)
     .then(resolvedinsuranceProviderIDs => {
       insuranceProvidersIDs = resolvedinsuranceProviderIDs;
     })
     .catch(error => response.status(500).json({ error }));
 
-  await database('professionals').insert(professional, 'id')
+  database('professionals').insert(professional, 'id')
     .then(insertedProfessionalID => {
       profID = insertedProfessionalID;
       return response.status(201).json({ id: insertedProfessionalID });
@@ -192,7 +195,7 @@ app.post('/api/v1/professionals', async (request, response) => {
 
 // begin /insuranceProviders
 app.get('/api/v1/insuranceProviders', (request, response) => {
-  database('insuranceProviders').select()
+  database('insurance_providers').select()
     .then(insuranceProviders => response.status(200).json({ insuranceProviders }))
     .catch(error => response.status(500).json({ error }));
 });
@@ -207,7 +210,7 @@ app.post('/api/v1/insuranceProviders', (request, response) => {
     }
   }
 
-  database('insuranceProviders').insert(insuranceProvider, 'id')
+  database('insurance_providers').insert(insuranceProvider, 'id')
     .then(insertedInsuranceProviderID => response.status(201).json({ id: insertedInsuranceProviderID }))
     .catch(error => response.status(500).json({ error }));
 });
@@ -261,7 +264,10 @@ app.post('/api/v1/challenges', (request, response) => {
 
 // begin /users/:userID
 app.get('/api/v1/users/:userID', (request, response) => {
-  database('users').where('id', request.params.userID).select()
+  database('users')
+    .join('user_challenges', 'users.id', 'user_challenges.user_id')
+    .where('users.id', request.params.userID)
+    .select()
     .then(user => {
       if (user.length) {
         return response.status(200).json({ user: user[0] });
@@ -271,7 +277,7 @@ app.get('/api/v1/users/:userID', (request, response) => {
     .catch(error => response.status(500).json({ error }));
 });
 
-app.delete('api/v1/users/:userID', (request, response) => {
+app.delete('/api/v1/users/:userID', (request, response) => {
   const userID = request.params.userID;
 
   database('users').where('id', userID).del()
@@ -281,7 +287,18 @@ app.delete('api/v1/users/:userID', (request, response) => {
 // end /users/:userID
 
 // begin /professionals/:professionalID
-app.delete('api/v1/professionals/:professionalID', (request, response) => {
+app.get('/api/v1/professionals/:professionalID', (request, response) => {
+  database('professionals').where('id', request.params.professionalID).select()
+    .then(professionals => {
+      if (professionals.length) {
+        return response.status(200).json({ professional: professionals[0] });
+      }
+      return response.status(404).json({ error: `Could not find any professional associated with id ${request.params.professionalID}.`});
+    })
+    .catch(error => response.status(500).json({ error }));
+});
+
+app.delete('/api/v1/professionals/:professionalID', (request, response) => {
   const professionalID = request.params.professionalID;
 
   database('professionals').where('id', professionalID).del()
@@ -291,17 +308,39 @@ app.delete('api/v1/professionals/:professionalID', (request, response) => {
 // end /professionals/:professionalID
 
 // begin /insuranceProviders/:insuranceProviderID
-app.delete('api/v1/insuranceProviders/:insuranceProviderID', (request, response) => {
+app.get('/api/v1/insuranceProviders/:insuranceProviderID', (request, response) => {
+  database('insurance_providers').where('id', request.params.insuranceProviderID).select()
+    .then(insuranceProviders => {
+      if (insuranceProviders.length) {
+        return response.status(200).json({ insuranceProvider: insuranceProviders[0] });
+      }
+      return response.status(404).json({ error: `Could not find any insurance provider associated with id ${request.params.insuranceProviderID}.`});
+    })
+    .catch(error => response.status(500).json({ error }));
+});
+
+app.delete('/api/v1/insuranceProviders/:insuranceProviderID', (request, response) => {
   const insuranceProviderID = request.params.insuranceProviderID;
 
-  database('insuranceProviders').where('id', insuranceProviderID).del()
+  database('insurance_providers').where('id', insuranceProviderID).del()
     .then(() => response.status(204).json( { insuranceProviderID }))
     .catch(() => response.status(404).json({ error: `Could not find insurance provider with id '${insuranceProviderID}'` }));
 });
 // end /insuranceProviders/:insuranceProviderID
 
 // begin /specialties/:specialtyID
-app.delete('api/v1/specialties/:specialtyID', (request, response) => {
+app.get('/api/v1/specialties/:specialtyID', (request, response) => {
+  database('specialties').where('id', request.params.specialtyID).select()
+    .then(specialties => {
+      if (specialties.length) {
+        return response.status(200).json({ specialty: specialties[0] });
+      }
+      return response.status(404).json({ error: `Could not find any specialty associated with id ${request.params.specialtyID}.`});
+    })
+    .catch(error => response.status(500).json({ error }));
+});
+
+app.delete('/api/v1/specialties/:specialtyID', (request, response) => {
   const specialtyID = request.params.specialtyID;
 
   database('specialties').where('id', specialtyID).del()
@@ -311,7 +350,18 @@ app.delete('api/v1/specialties/:specialtyID', (request, response) => {
 // end /specialties/:specialtyID
 
 // begin /challenges/:challengeID
-app.delete('api/v1/challenges/:challengeID', (request, response) => {
+app.get('/api/v1/challenges/:challengeID', (request, response) => {
+  database('challenges').where('id', request.params.challengeID).select()
+    .then(challenges => {
+      if (challenges.length) {
+        return response.status(200).json({ challenge: challenges[0] });
+      }
+      return response.status(404).json({ error: `Could not find any challenge associated with id ${request.params.challengeID}.`});
+    })
+    .catch(error => response.status(500).json({ error }));
+});
+
+app.delete('/api/v1/challenges/:challengeID', (request, response) => {
   const challengeID = request.params.challengeID;
 
   database('challenges').where('id', challengeID).del()
