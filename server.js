@@ -39,9 +39,12 @@ app.get('/api/v1/users', (request, response) => {
   const queryParameterValue = request.query[queryParameter];
 
   if (!queryParameter) {
+    // returns one item for each entry in user_challenges instead of one item per user in users,
+    // each with an array of challenges
     database('users')
-      // .join('user_challenges', 'user_challenges.user_id', '=', 'users.id')
-      .select()
+      .join('user_challenges', 'users.id', '=', 'user_challenges.user_id')
+      .join('challenges', 'challenges.id', 'user_challenges.challenge_id')
+      .select('users.*', 'challenges.challenge_name')
       .then(users => response.status(200).json({ users }))
       .catch(error => response.status(500).json({ error }));
   } else {
@@ -264,10 +267,13 @@ app.post('/api/v1/challenges', (request, response) => {
 
 // begin /users/:userID
 app.get('/api/v1/users/:userID', (request, response) => {
+  // will return 404 if user id does not exist in user_challenges
+  // only returns 1st challenge, not all challenges
   database('users')
-    .join('user_challenges', 'users.id', 'user_challenges.user_id')
     .where('users.id', request.params.userID)
-    .select()
+    .join('user_challenges', 'users.id', '=', 'user_challenges.user_id')
+    .join('challenges', 'challenges.id', '=', 'user_challenges.challenge_id')
+    .select('users.*', 'challenges.challenge_name')
     .then(user => {
       if (user.length) {
         return response.status(200).json({ user: user[0] });
