@@ -42,10 +42,47 @@ app.get('/api/v1/users', (request, response) => {
     // returns one item for each entry in user_challenges instead of one item per user in users,
     // each with an array of challenges
     database('users')
-      .join('user_challenges', 'users.id', '=', 'user_challenges.user_id')
-      .join('challenges', 'challenges.id', 'user_challenges.challenge_id')
+      // .join('user_challenges', 'users.id', '=', 'user_challenges.user_id')
+      // .join('challenges', 'challenges.id', 'user_challenges.challenge_id')
+      // .select('users.*', 'challenges.challenge_name')
+      // .then(users => response.status(200).json({ users }))
+      .leftJoin('user_challenges', 'users.id', '=', 'user_challenges.user_id')
+      .leftJoin('challenges', 'challenges.id', '=', 'user_challenges.challenge_id')
       .select('users.*', 'challenges.challenge_name')
-      .then(users => response.status(200).json({ users }))
+      .then(users => {
+        // console.log('users: ', users);
+        if (users.length) {
+          // let completeUser = {user_challenges: []};
+          let allCompleteUsers =[];
+          users.forEach(user => {
+
+            const completeUserIndex = allCompleteUsers.findIndex(completeUser => {
+              return completeUser.id === user.id;
+            });
+            if (completeUserIndex === -1) {
+              allCompleteUsers.push({
+                id: user.id,
+                user_name: user.user_name,
+                user_image: user.user_image,
+                user_about: user.user_about,
+                user_location: user.user_location,
+                user_email: user.user_email,
+                user_challenges: []
+              });
+              if (user.challenge_name) {
+                allCompleteUsers[allCompleteUsers.length - 1].user_challenges.push(user.challenge_name);
+              }
+            } else {
+              if (user.challenge_name) {
+                allCompleteUsers[completeUserIndex].user_challenges.push(user.challenge_name);
+              }
+            }
+          });
+
+          return response.status(200).json({ users: allCompleteUsers });
+        }
+        return response.status(404).json({ error: `Could not find any user associated with id ${request.params.userID}.`});
+      })
       .catch(error => response.status(500).json({ error }));
   } else {
     database('users').where(queryParameter.toLowerCase(), queryParameterValue).select()
@@ -268,15 +305,28 @@ app.post('/api/v1/challenges', (request, response) => {
 // begin /users/:userID
 app.get('/api/v1/users/:userID', (request, response) => {
   // will return 404 if user id does not exist in user_challenges
-  // only returns 1st challenge, not all challenges
   database('users')
     .where('users.id', request.params.userID)
-    .join('user_challenges', 'users.id', '=', 'user_challenges.user_id')
-    .join('challenges', 'challenges.id', '=', 'user_challenges.challenge_id')
+    .leftJoin('user_challenges', 'users.id', '=', 'user_challenges.user_id')
+    .leftJoin('challenges', 'challenges.id', '=', 'user_challenges.challenge_id')
     .select('users.*', 'challenges.challenge_name')
-    .then(user => {
-      if (user.length) {
-        return response.status(200).json({ user: user[0] });
+    .then(users => {
+      if (users.length) {
+        let completeUser = {user_challenges: []};
+        users.forEach(user => {
+          if (user.challenge_name) {
+            completeUser.user_challenges.push(user.challenge_name);
+          }
+        });
+        Object.assign(completeUser, {
+          id: users[0].id,
+          user_name: users[0].user_name,
+          user_image: users[0].user_image,
+          user_about: users[0].user_about,
+          user_location: users[0].user_location,
+          user_email: users[0].user_email
+        });
+        return response.status(200).json({ user: completeUser });
       }
       return response.status(404).json({ error: `Could not find any user associated with id ${request.params.userID}.`});
     })
