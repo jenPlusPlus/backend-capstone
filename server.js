@@ -3,7 +3,7 @@ const express = require('express');
 // const path = require('path');
 
 const app = express();
-require('express-async-await')(app);
+const cors = require('express-cors');
 const bodyParser = require('body-parser');
 
 // set up for future use
@@ -20,6 +20,13 @@ app.locals.title = 'Capstone';
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(cors());
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
 
 const environment = process.env.NODE_ENV || 'development';
 const configuration = require('./knexfile')[environment];
