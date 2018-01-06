@@ -586,7 +586,7 @@ app.get('/api/v1/favoriteUsers/:userID', (request, response) => {
   database('favorite_users')
     .where('favorite_users.user_id', request.params.userID)
     .join('users', 'favorite_users.favorite_user_id', '=', 'users.id')
-    .select('users.user_name')
+    .select('users.*')
     .then(favoriteUsers => {
       console.log('favoriteUsers: ', favoriteUsers);
       if (favoriteUsers.length) {
