@@ -39,23 +39,14 @@ app.get('/api/v1/users', (request, response) => {
   const queryParameterValue = request.query[queryParameter];
 
   if (!queryParameter) {
-    // returns one item for each entry in user_challenges instead of one item per user in users,
-    // each with an array of challenges
     database('users')
-      // .join('user_challenges', 'users.id', '=', 'user_challenges.user_id')
-      // .join('challenges', 'challenges.id', 'user_challenges.challenge_id')
-      // .select('users.*', 'challenges.challenge_name')
-      // .then(users => response.status(200).json({ users }))
       .leftJoin('user_challenges', 'users.id', '=', 'user_challenges.user_id')
       .leftJoin('challenges', 'challenges.id', '=', 'user_challenges.challenge_id')
       .select('users.*', 'challenges.challenge_name')
       .then(users => {
-        // console.log('users: ', users);
         if (users.length) {
-          // let completeUser = {user_challenges: []};
           let allCompleteUsers =[];
           users.forEach(user => {
-
             const completeUserIndex = allCompleteUsers.findIndex(completeUser => {
               return completeUser.id === user.id;
             });
