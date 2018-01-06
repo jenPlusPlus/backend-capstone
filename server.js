@@ -78,10 +78,9 @@ app.get('/api/v1/users', (request, response) => {
               }
             }
           });
-
           return response.status(200).json({ users: allCompleteUsers });
         }
-        return response.status(404).json({ error: `Could not find any user associated with id ${request.params.userID}.`});
+        return response.status(404).json({ error: `Could not find any users.`});
       })
       .catch(error => response.status(500).json({ error }));
   } else {
@@ -98,46 +97,61 @@ app.get('/api/v1/users', (request, response) => {
 
 app.post('/api/v1/users', (request, response) => {
   const { user_name, user_image, user_about, user_location, user_email, user_challenges } = request.body;
+
   const user = { user_name, user_image, user_about, user_location, user_email };
   let userID;
-  let userChallengeIDPromises;
-  let userChallengeIDs;
+  let userChallengeIDPromises = [];
+  let userChallengeIDs = [];
 
-  for (const requiredParameter of ['user_name', 'user_about', 'user_location, user_email']) {
+  for (const requiredParameter of ['user_name']) {
     if (!user[requiredParameter]) {
       return response.status(422).json( { error: `You are missing the '${requiredParameter}' property` });
     }
   }
 
-  userChallengeIDPromises = user_challenges.map(challenge => {
-    return database('challenges').where('challenge_name', challenge).select()
-      .then(challenges => challenges.challenge_id)
-      .catch(error => response.status(500).json({ error }));
-  });
-
-  Promise.all(userChallengeIDPromises)
-    .then(resolvedChallengeIDs => {
-      userChallengeIDs = resolvedChallengeIDs;
-    })
-    .catch(error => response.status(500).json({ error }));
-
   database('users').insert(user, 'id')
     .then(insertedUserID => {
-      userID = insertedUserID;
-      response.status(201).json({ id: insertedUserID });
+      userID = insertedUserID[0];
+
+
+      if (user_challenges.length > 0) {
+        userChallengeIDPromises = user_challenges.map(challenge => {
+          return database('challenges').where('challenge_name', challenge).select('id')
+            .catch(error => response.status(500).json({ error }));
+        });
+
+
+        Promise.all(userChallengeIDPromises)
+          .then(resolvedChallengeIDs => {
+            userChallengeIDs = resolvedChallengeIDs.reduce((acc, resChallengeID) => {
+              acc.push(resChallengeID[0].id);
+              return acc;
+            }, []);
+            return userChallengeIDs;
+          })
+          .then(results => {
+
+            const userChallenges = results.map(userChallengeID => {
+              return {
+                user_id: userID,
+                challenge_id: userChallengeID
+              };
+            });
+
+            database('user_challenges').insert(userChallenges, '*')
+              .then(insertedUserChallenges => {
+                return response.status(201).json({ userChallenge: insertedUserChallenges });
+              })
+              .catch(error => response.status(500).json({ error }));
+
+          })
+          .catch(error => response.status(500).json({ error }));
+      }
+
+      response.status(201).json({ id: insertedUserID[0] });
     })
     .catch(error => response.status(500).json({ error }));
 
-  const userChallenges = userChallengeIDs.map(userChallengeID => {
-    return {
-      user_id: userID,
-      challenge_id: userChallengeID
-    };
-  });
-
-  database('user_challenges').insert(userChallenges)
-    .then(insertedUserChallenge => response.status(201).json({ userChallenge: insertedUserChallenge }))
-    .catch(error => response.status(500).json({ error }));
 });
 // end /users
 
