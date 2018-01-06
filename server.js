@@ -236,13 +236,22 @@ app.get('/api/v1/professionals', (request, response) => {
 });
 
 app.post('/api/v1/professionals', (request, response) => {
-  const { professional_name, professional_image, professional_location, professional_specialties, professional_insurance_providers } = request.body;
-  const professional = { professional_name, professional_image, professional_location };
+  const {
+    professional_name,
+    professional_image,
+    professional_location,
+    professional_specialties,
+    professional_insurance_providers,
+    professional_email,
+    professional_phone
+  } = request.body;
+
+  const professional = { professional_name, professional_image, professional_location, professional_email, professional_phone };
   let profID;
   let specialtyIDPromises = [];
-  let specialtyIDs;
+  let specialtyIDs = [];
   let insuranceProviderIDPromises = [];
-  let insuranceProvidersIDs;
+  let insuranceProvidersIDs = [];
 
   for (const requiredParameter of ['professional_name', 'professional_location']) {
     if (!professional[requiredParameter]) {
@@ -252,68 +261,73 @@ app.post('/api/v1/professionals', (request, response) => {
 
   database('professionals').insert(professional, 'id')
     .then(insertedProfessionalID => {
-      profID = insertedProfessionalID;
+      profID = insertedProfessionalID[0];
 
       if (professional_specialties.length > 0) {
         specialtyIDPromises = professional_specialties.map(specialty => {
           return database('specialties').where('specialty_name', specialty).select('id')
             .catch(error => response.status(500).json({ error }));
         });
+
+
+        Promise.all(specialtyIDPromises)
+          .then(resolvedSpecialtyIDs => {
+            specialtyIDs = resolvedSpecialtyIDs.reduce((acc, resSpecialtyId) => {
+              acc.push(resSpecialtyId[0].id);
+              return acc;
+            }, []);
+            return specialtyIDs;
+          })
+          .then(results => {
+
+            const profSpecialties = results.map(profSpecialtyID => {
+              return {
+                professional_id: profID,
+                specialty_id: profSpecialtyID
+              };
+            });
+
+            database('professional_specialties').insert(profSpecialties, '*')
+              .then(insertedProfessionalSpecialty => response.status(201).json({ professionalSpecialty: insertedProfessionalSpecialty }))
+              .catch(error => response.status(500).json({ error }));
+          })
+          .catch(error => response.status(500).json({ error }));
       }
 
-      Promise.all(specialtyIDPromises)
-        .then(resolvedSpecialtyIDs => {
-          specialtyIDs = resolvedSpecialtyIDs;
-        })
-        .catch(error => response.status(500).json({ error }));
+      if (professional_insurance_providers.length > 0) {
+        insuranceProviderIDPromises = professional_insurance_providers.map(insuranceProvider => {
+          return database('insurance_providers').where('insurance_provider_name', insuranceProvider).select('id')
+            .catch(error => response.status(500).json({ error }));
+        });
 
+        Promise.all(insuranceProviderIDPromises)
+          .then(resolvedinsuranceProviderIDs => {
+            insuranceProvidersIDs = resolvedinsuranceProviderIDs.reduce((acc, resInsuranceID) => {
+              acc.push(resInsuranceID[0].id);
+              return acc;
+            }, []);
+            return insuranceProvidersIDs;
+          })
+          .then(results => {
+            const profInsurances = results.map(profInsuranceID => {
+              return {
+                professional_id: profID,
+                insurance_provider_id: profInsuranceID
+              };
+            });
+            database('professional_insurance_providers').insert(profInsurances, '*')
+              .then(insertedProfessionalInsuranceProvider => {
+                return response.status(201).json({ professionalInsuranceProvider: insertedProfessionalInsuranceProvider });
+              })
+              .catch(error => response.status(500).json({ error }));
+          })
+          .catch(error => response.status(500).json({ error }));
 
-
+      }
 
       return response.status(201).json({ id: insertedProfessionalID });
     })
     .catch(error => response.status(500).json({ error }));
-
-
-
-
-
-  insuranceProviderIDPromises = professional_insurance_providers.map(insuranceProvider => {
-    return database('insurance_providers').where('insuranceProvider_name', insuranceProvider).select()
-      .then(insuranceProviders => insuranceProviders.insuranceProvider_id)
-      .catch(error => response.status(500).json({ error }));
-  });
-
-  Promise.all(insuranceProviderIDPromises)
-    .then(resolvedinsuranceProviderIDs => {
-      insuranceProvidersIDs = resolvedinsuranceProviderIDs;
-    })
-    .catch(error => response.status(500).json({ error }));
-
-
-
-  const professionalSpecialties = specialtyIDs.map(specialtyID => {
-    return {
-      professional_id: profID,
-      specialty_id: specialtyID
-    };
-  });
-
-  database('professional_specialties').insert(professionalSpecialties)
-    .then(insertedProfessionalSpecialty => response.status(201).json({ professionalSpecialty: insertedProfessionalSpecialty }))
-    .catch(error => response.status(500).json({ error }));
-
-  const professionalInsuranceProviders = insuranceProvidersIDs.map(insuranceProviderID => {
-    return {
-      professional_id: profID,
-      insuranceProvider_id: insuranceProviderID
-    };
-  });
-
-  database('professional_insurance_providers').insert(professionalInsuranceProviders)
-    .then(insertedProfessionalInsuranceProvider => response.status(201).json({ professionalInsuranceProvider: insertedProfessionalInsuranceProvider }))
-    .catch(error => response.status(500).json({ error }));
-
 });
 // end /professionals
 
@@ -325,8 +339,8 @@ app.get('/api/v1/insuranceProviders', (request, response) => {
 });
 
 app.post('/api/v1/insuranceProviders', (request, response) => {
-  const { insuranceProvider_name } = request.body;
-  const insuranceProvider = { insuranceProvider_name };
+  const { insurance_provider_name } = request.body;
+  const insuranceProvider = { insurance_provider_name };
 
   for (const requiredParameter of ['specialty_name']) {
     if (!insuranceProvider[requiredParameter]) {
