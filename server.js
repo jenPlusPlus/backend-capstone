@@ -422,7 +422,7 @@ app.get('/api/v1/professionals/:professionalID', (request, response) => {
         let completeProfessional = {
           professional_insurance_providers: [],
           professional_specialties: []
-        }
+        };
         professionals.forEach(professional => {
           if (professional.insurance_provider_name) {
 
@@ -450,7 +450,7 @@ app.get('/api/v1/professionals/:professionalID', (request, response) => {
           professional_location: professionals[0].professional_location,
           professional_email: professionals[0].professional_email,
           professional_phone: professionals[0].professional_phone
-        })
+        });
         return response.status(200).json({ professional: completeProfessional });
       }
       return response.status(404).json({ error: `Could not find any professional associated with id ${request.params.professionalID}.`});
