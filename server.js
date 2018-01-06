@@ -428,7 +428,13 @@ app.delete('/api/v1/users/:userID', (request, response) => {
 
 // begin /professionals/:professionalID
 app.get('/api/v1/professionals/:professionalID', (request, response) => {
-  database('professionals').where('id', request.params.professionalID).select()
+  database('professionals')
+    .where('professionals.id', request.params.professionalID)
+    .leftJoin('professional_specialties', 'professionals.id', '=', 'professional_specialties.professional_id')
+    .leftJoin('specialties', 'specialties.id', '=', 'professional_specialties.specialty_id')
+    .leftJoin('professional_insurance_providers', 'professionals.id', '=', 'professional_insurance_providers.professional_id')
+    .leftJoin('insurance_providers', 'insurance_providers.id', '=', 'professional_insurance_providers.insurance_provider_id')
+    .select('professionals.*', 'insurance_providers.insurance_provider_name', 'specialties.specialty_name')
     .then(professionals => {
       if (professionals.length) {
 
