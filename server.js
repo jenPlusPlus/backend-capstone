@@ -152,8 +152,69 @@ app.get('/api/v1/professionals', (request, response) => {
   const queryParameterValue = request.query[queryParameter];
 
   if (!queryParameter) {
-    database('professionals').select()
-      .then(professionals => response.status(200).json({ professionals }))
+    database('professionals')
+      .leftJoin('professional_specialties', 'professionals.id', '=', 'professional_specialties.professional_id')
+      .leftJoin('specialties', 'specialties.id', '=', 'professional_specialties.specialty_id')
+      .leftJoin('professional_insurance_providers', 'professionals.id', '=', 'professional_insurance_providers.professional_id')
+      .leftJoin('insurance_providers', 'insurance_providers.id', '=', 'professional_insurance_providers.insurance_provider_id')
+      .select('professionals.*', 'insurance_providers.insurance_provider_name', 'specialties.specialty_name')
+      .then(professionals => {
+
+        if (professionals.length) {
+          let allCompleteProfessionals = [];
+          professionals.forEach(professional => {
+
+            const completeProfessionalIndex = allCompleteProfessionals.findIndex(completeProfessional => {
+              return completeProfessional.id === professional.id;
+            });
+
+            if (completeProfessionalIndex === -1 ) {
+              allCompleteProfessionals.push({
+                id: professional.id,
+                professional_name: professional.professional_name,
+                professional_image: professional.professional_image,
+                professional_location: professional.professional_location,
+                professional_email: professional.professional_email,
+                professional_phone: professional.professional_phone,
+                professional_insurance_providers: [],
+                professional_specialties: []
+              });
+
+              if (professional.insurance_provider_name) {
+
+                allCompleteProfessionals[allCompleteProfessionals.length - 1].professional_insurance_providers.push(professional.insurance_provider_name);
+              }
+
+              if (professional.specialty_name) {
+                allCompleteProfessionals[allCompleteProfessionals.length - 1].professional_specialties.push(professional.specialty_name);
+              }
+
+            } else {
+              if (professional.insurance_provider_name) {
+
+                const providerIndex = allCompleteProfessionals[completeProfessionalIndex].professional_insurance_providers
+                  .findIndex( provider => professional.insurance_provider_name === provider);
+
+                if (providerIndex === -1) {
+                  allCompleteProfessionals[completeProfessionalIndex].professional_insurance_providers.push(professional.insurance_provider_name);
+                }
+
+              }
+
+              if (professional.specialty_name) {
+                const specialtyIndex = allCompleteProfessionals[completeProfessionalIndex].professional_specialties
+                  .findIndex( specialty => professional.specialty_name === specialty);
+
+                if (specialtyIndex === -1) {
+                  allCompleteProfessionals[completeProfessionalIndex].professional_specialties.push(professional.specialty_name);
+                }
+              }
+            }
+          });
+          return response.status(200).json({ professionals: allCompleteProfessionals });
+        }
+        return response.status(404).json({ error: `Could not find any professionals.`});
+      })
       .catch(error => response.status(500).json({ error }));
   } else {
     database('professionals').where(queryParameter.toLowerCase(), queryParameterValue).select()
