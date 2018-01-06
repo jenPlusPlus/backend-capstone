@@ -687,10 +687,13 @@ app.delete('/api/v1/favoriteUsers/:userID/:favoriteUserID', (request, response) 
 
 // begin /favoriteProfessionals/:userID
 app.get('/api/v1/favoriteProfessionals/:userID', (request, response) => {
-  database('favorite_professionals').where('user_id', request.params.userID).select()
+  database('favorite_professionals')
+    .where('favorite_professionals.user_id', request.params.userID)
+    .join('professionals', 'favorite_professionals.favorite_professional_id', '=', 'professionals.id')
+    .select('professionals.*')
     .then(favoriteProfessionals => {
       if (favoriteProfessionals.length) {
-        return response.status(200).json({ favoriteProfessionals: favoriteProfessionals[0] });
+        return response.status(200).json({ favoriteProfessionals: favoriteProfessionals });
       }
       return response.status(404).json({ error: `Could not find any favorite professionals for user id ${request.params.userID}.`});
     })
