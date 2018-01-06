@@ -16,7 +16,7 @@ app.set('port', process.env.PORT || 3000);
 // app.set('secretKey', process.env.SECRET_KEY);
 
 // change title when we've decided on application name
-app.locals.title = 'Capstone';
+app.locals.title = 'Mental Healthy Backend';
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -82,14 +82,86 @@ app.get('/api/v1/users', (request, response) => {
       })
       .catch(error => response.status(500).json({ error }));
   } else {
-    database('users').where(queryParameter.toLowerCase(), queryParameterValue).select()
-      .then(users => {
-        if (!users.length) {
-          return response.status(404).json({ error: `Could not find any users associated with '${queryParameter}' of '${queryParameterValue}'` });
-        }
-        return response.status(200).json({ users });
-      })
-      .catch(error => response.status(500).json({ error }));
+    // if there's a query
+    console.log('queryParam: ', queryParameter);
+    if (queryParameter.toLowerCase() === 'user_challenge') {
+      // query is challenges
+      let challengeUsers = [];
+      let allChallengeUsers = [];
+      database('challenges')
+        .where('challenge_name', queryParameterValue)
+        .select('id')
+        .then(challengeID => {
+          console.log('challengeID: ', challengeID[0].id);
+          database('user_challenges')
+            .where('challenge_id', challengeID[0].id)
+            .select('user_id')
+            .then(usersWithChallenges => {
+              // console.log('usersWithChallenges: ', usersWithChallenges);
+              if (usersWithChallenges.length > 0) {
+                usersWithChallenges.forEach(userWithChallenge => {
+                  console.log('userWithChallenge: ', userWithChallenge.user_id);
+                  database('users')
+                    .where('users.id', userWithChallenge.user_id)
+                    .leftJoin('user_challenges', 'users.id', '=', 'user_challenges.user_id')
+                    .leftJoin('challenges', 'challenges.id', '=', 'user_challenges.challenge_id')
+                    .select('users.*', 'challenges.challenge_name')
+                    .then(users => {
+
+                      console.log('users: ', users.length);
+                      allChallengeUsers = allChallengeUsers.concat(users)
+                      console.log('allChallengeUsers: ', allChallengeUsers);
+                      if (users.length) {
+                        let allCompleteUsers =[];
+                        users.forEach(user => {
+                          const completeUserIndex = allCompleteUsers.findIndex(completeUser => {
+                            return completeUser.id === user.id;
+                          });
+                          if (completeUserIndex === -1) {
+                            allCompleteUsers.push({
+                              id: user.id,
+                              user_name: user.user_name,
+                              user_image: user.user_image,
+                              user_about: user.user_about,
+                              user_location: user.user_location,
+                              user_email: user.user_email,
+                              user_challenges: []
+                            });
+                            if (user.challenge_name) {
+                              allCompleteUsers[allCompleteUsers.length - 1].user_challenges.push(user.challenge_name);
+                            }
+                          } else {
+                            if (user.challenge_name) {
+                              allCompleteUsers[completeUserIndex].user_challenges.push(user.challenge_name);
+                            }
+                          }
+                        });
+                        return response.status(200).json({ users: allCompleteUsers });
+                      }
+                      return response.status(404).json({ error: `Could not find any users associated with '${queryParameter}' of '${queryParameterValue}'` });
+                    })
+                    .catch(error => response.status(500).json({ error }));
+                })
+
+              }
+            })
+            .catch(error => response.status(500).json({ error }));
+        })
+        .catch(error => response.status(500).json({ error }));
+      console.log('allChallengeUsers: ', allChallengeUsers);
+    } else {
+    // query is not challenge
+      database('users')
+        .where(queryParameter.toLowerCase(), queryParameterValue)
+        .select()
+        .then(users => {
+          if (!users.length) {
+            return response.status(404).json({ error: `Could not find any users associated with '${queryParameter}' of '${queryParameterValue}'` });
+          }
+          return response.status(200).json({ users });
+        })
+        .catch(error => response.status(500).json({ error }));
+    }
   }
 });
 
@@ -110,7 +182,6 @@ app.post('/api/v1/users', (request, response) => {
   database('users').insert(user, 'id')
     .then(insertedUserID => {
       userID = insertedUserID[0];
-
 
       if (user_challenges.length > 0) {
         userChallengeIDPromises = user_challenges.map(challenge => {
@@ -146,7 +217,7 @@ app.post('/api/v1/users', (request, response) => {
           .catch(error => response.status(500).json({ error }));
       }
 
-      response.status(201).json({ id: insertedUserID[0] });
+      return response.status(201).json({ id: insertedUserID[0] });
     })
     .catch(error => response.status(500).json({ error }));
 
@@ -565,10 +636,14 @@ app.delete('/api/v1/challenges/:challengeID', (request, response) => {
 
 // begin /favoriteUsers/:userID
 app.get('/api/v1/favoriteUsers/:userID', (request, response) => {
-  database('favorite_users').where('user_id', request.params.userID).select()
+  database('favorite_users')
+    .where('favorite_users.user_id', request.params.userID)
+    .join('users', 'favorite_users.favorite_user_id', '=', 'users.id')
+    .select('users.*')
     .then(favoriteUsers => {
+      console.log('favoriteUsers: ', favoriteUsers);
       if (favoriteUsers.length) {
-        return response.status(200).json({ favoriteUsers: favoriteUsers[0] });
+        return response.status(200).json({ favoriteUsers: favoriteUsers });
       }
       return response.status(404).json({ error: `Could not find any favorite users for user id ${request.params.userID}.`});
     })
@@ -615,7 +690,7 @@ app.get('/api/v1/favoriteProfessionals/:userID', (request, response) => {
   database('favorite_professionals').where('user_id', request.params.userID).select()
     .then(favoriteProfessionals => {
       if (favoriteProfessionals.length) {
-        return response.status(200).json({ favoriteUsers: favoriteProfessionals[0] });
+        return response.status(200).json({ favoriteProfessionals: favoriteProfessionals[0] });
       }
       return response.status(404).json({ error: `Could not find any favorite professionals for user id ${request.params.userID}.`});
     })
