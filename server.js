@@ -428,10 +428,49 @@ app.delete('/api/v1/users/:userID', (request, response) => {
 
 // begin /professionals/:professionalID
 app.get('/api/v1/professionals/:professionalID', (request, response) => {
-  database('professionals').where('id', request.params.professionalID).select()
+  database('professionals')
+    .where('professionals.id', request.params.professionalID)
+    .leftJoin('professional_specialties', 'professionals.id', '=', 'professional_specialties.professional_id')
+    .leftJoin('specialties', 'specialties.id', '=', 'professional_specialties.specialty_id')
+    .leftJoin('professional_insurance_providers', 'professionals.id', '=', 'professional_insurance_providers.professional_id')
+    .leftJoin('insurance_providers', 'insurance_providers.id', '=', 'professional_insurance_providers.insurance_provider_id')
+    .select('professionals.*', 'insurance_providers.insurance_provider_name', 'specialties.specialty_name')
     .then(professionals => {
       if (professionals.length) {
-        return response.status(200).json({ professional: professionals[0] });
+
+        let completeProfessional = {
+          professional_insurance_providers: [],
+          professional_specialties: []
+        };
+        professionals.forEach(professional => {
+          if (professional.insurance_provider_name) {
+
+            const providerIndex = completeProfessional.professional_insurance_providers
+              .findIndex( provider => professional.insurance_provider_name === provider);
+
+            if (providerIndex === -1) {
+              completeProfessional.professional_insurance_providers.push(professional.insurance_provider_name);
+            }
+          }
+          if (professional.specialty_name) {
+
+            const specialtyIndex = completeProfessional.professional_specialties
+              .findIndex( specialty => professional.specialty_name === specialty);
+
+            if (specialtyIndex === -1) {
+              completeProfessional.professional_specialties.push(professional.specialty_name);
+            }
+          }
+        });
+        Object.assign(completeProfessional, {
+          id: professionals[0].id,
+          professional_name: professionals[0].professional_name,
+          professional_image: professionals[0].professional_image,
+          professional_location: professionals[0].professional_location,
+          professional_email: professionals[0].professional_email,
+          professional_phone: professionals[0].professional_phone
+        });
+        return response.status(200).json({ professional: completeProfessional });
       }
       return response.status(404).json({ error: `Could not find any professional associated with id ${request.params.professionalID}.`});
     })
