@@ -3,7 +3,7 @@ const express = require('express');
 // const path = require('path');
 
 const app = express();
-require('express-async-await')(app);
+const cors = require('express-cors');
 const bodyParser = require('body-parser');
 
 // set up for future use
@@ -20,6 +20,13 @@ app.locals.title = 'Capstone';
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(cors());
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
 
 const environment = process.env.NODE_ENV || 'development';
 const configuration = require('./knexfile')[environment];
@@ -229,33 +236,49 @@ app.get('/api/v1/professionals', (request, response) => {
 });
 
 app.post('/api/v1/professionals', (request, response) => {
-  const { professional_name, professional_image, professional_location, professional_specialties, professional_insuranceProviders } = request.body;
+  const { professional_name, professional_image, professional_location, professional_specialties, professional_insurance_providers } = request.body;
   const professional = { professional_name, professional_image, professional_location };
   let profID;
-  let specialtyIDPromises;
+  let specialtyIDPromises = [];
   let specialtyIDs;
-  let insuranceProviderIDPromises;
+  let insuranceProviderIDPromises = [];
   let insuranceProvidersIDs;
 
-  for (const requiredParameter of ['professional_name', 'professional_location', 'professional_specialties', 'professional_insuranceProviders']) {
+  for (const requiredParameter of ['professional_name', 'professional_location']) {
     if (!professional[requiredParameter]) {
       return response.status(422).json( { error: `You are missing the '${requiredParameter}' property` });
     }
   }
 
-  specialtyIDPromises = professional_specialties.map(specialty => {
-    return database('specialties').where('specialty_name', specialty).select()
-      .then(specialties => specialties.specialty_id)
-      .catch(error => response.status(500).json({ error }));
-  });
+  database('professionals').insert(professional, 'id')
+    .then(insertedProfessionalID => {
+      profID = insertedProfessionalID;
 
-  Promise.all(specialtyIDPromises)
-    .then(resolvedSpecialtyIDs => {
-      specialtyIDs = resolvedSpecialtyIDs;
+      if (professional_specialties.length > 0) {
+        specialtyIDPromises = professional_specialties.map(specialty => {
+          return database('specialties').where('specialty_name', specialty).select('id')
+            .catch(error => response.status(500).json({ error }));
+        });
+      }
+
+      Promise.all(specialtyIDPromises)
+        .then(resolvedSpecialtyIDs => {
+          specialtyIDs = resolvedSpecialtyIDs;
+        })
+        .catch(error => response.status(500).json({ error }));
+
+
+
+
+      return response.status(201).json({ id: insertedProfessionalID });
     })
     .catch(error => response.status(500).json({ error }));
 
-  insuranceProviderIDPromises = professional_insuranceProviders.map(insuranceProvider => {
+
+
+
+
+  insuranceProviderIDPromises = professional_insurance_providers.map(insuranceProvider => {
     return database('insurance_providers').where('insuranceProvider_name', insuranceProvider).select()
       .then(insuranceProviders => insuranceProviders.insuranceProvider_id)
       .catch(error => response.status(500).json({ error }));
@@ -267,12 +290,7 @@ app.post('/api/v1/professionals', (request, response) => {
     })
     .catch(error => response.status(500).json({ error }));
 
-  database('professionals').insert(professional, 'id')
-    .then(insertedProfessionalID => {
-      profID = insertedProfessionalID;
-      return response.status(201).json({ id: insertedProfessionalID });
-    })
-    .catch(error => response.status(500).json({ error }));
+
 
   const professionalSpecialties = specialtyIDs.map(specialtyID => {
     return {
@@ -292,7 +310,7 @@ app.post('/api/v1/professionals', (request, response) => {
     };
   });
 
-  database('professional_insuranceProviders').insert(professionalInsuranceProviders)
+  database('professional_insurance_providers').insert(professionalInsuranceProviders)
     .then(insertedProfessionalInsuranceProvider => response.status(201).json({ professionalInsuranceProvider: insertedProfessionalInsuranceProvider }))
     .catch(error => response.status(500).json({ error }));
 
