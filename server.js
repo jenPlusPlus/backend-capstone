@@ -341,7 +341,7 @@ app.get('/api/v1/professionals', (request, response) => {
         .where('specialty_name', queryParameterValue)
         .select('id')
         .then(specialtyID => {
-    
+
           database('professional_specialties')
             .where('specialty_id', specialtyID[0].id)
             .select('professional_id')
@@ -590,8 +590,58 @@ app.delete('/api/v1/users/:userID', (request, response) => {
 
 app.patch('/api/v1/users/:userID', (request, response) => {
   const userID = request.params.userID;
-  const body = { user_name, user_about, user_location, user_challenges };
-  console.log(body);
+  const { user_name, user_about, user_location, user_challenges } = request.body;
+  const body = { user_name, user_about, user_location };
+
+
+  const updateInUsersTable = () => {
+    database('users').where('id', userID).update(body, '*')
+      .then(user => {
+
+        if (user.length > 0) {
+          getUsersAndChallenges([userID])
+            .then(usersAndChallenges => {
+              return response.status(202).json({ user: usersAndChallenges[0] });
+            })
+            .catch(error => response.status(500).json({ error }));
+        } else {
+          return response.status(404).json({ error: `Could not find any user associated with id ${userID}` });
+        }
+      })
+      .catch(error => response.status(500).json({ error }));
+  };
+
+  if (user_challenges) {
+
+    database('user_challenges').where('user_id', userID).del().catch(error => response.status(500).json({ error }));
+
+    const userChallengePromises = user_challenges.map(challenge => {
+      return database('challenges')
+        .where('challenge_name', challenge)
+        .select('id')
+        .then(results => results[0])
+        .catch();
+    });
+
+    Promise.all(userChallengePromises)
+      .then(results => {
+        const challengesToInsert = results.map(challengeObject => {
+          return {
+            user_id: userID,
+            challenge_id: challengeObject.id
+          };
+        });
+
+        database('user_challenges').insert(challengesToInsert, '*')
+          .then(() => updateInUsersTable())
+          .catch(error => response.status(500).json({ error }));
+      })
+      .catch(error => response.status(500).json({ error }));
+  } else {
+    updateInUsersTable();
+  }
+
+
 });
 // end /users/:userID
 
