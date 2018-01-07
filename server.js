@@ -177,7 +177,7 @@ app.get('/api/v1/users', (request, response) => {
                     return response.status(200).json({ users: usersAndChallenges });
                   });
               } else {
-                console.log('empty');
+
                 return response.status(404).json({ error: `Could not find any users associated with '${queryParameter}' of '${queryParameterValue}'` });
               }
             }) // end user_challenges then
@@ -341,21 +341,21 @@ app.get('/api/v1/professionals', (request, response) => {
         .where('specialty_name', queryParameterValue)
         .select('id')
         .then(specialtyID => {
-          console.log('specialtyID: ', specialtyID);
+    
           database('professional_specialties')
             .where('specialty_id', specialtyID[0].id)
             .select('professional_id')
             .then(profsWithSpecialties => {
               if (profsWithSpecialties.length > 0) {
                 const profIdArray = profsWithSpecialties.map(profObject => profObject.professional_id);
-                console.log('profIdArray: ', profIdArray);
+
                 getProfessionalInsSpec(profIdArray)
                   .then(profsInsSpec => {
-                    console.log('profsInsSpec: ', profsInsSpec);
+
                     return response.status(200).json({ professionals: profsInsSpec });
                   });
               } else {
-                console.log('empty');
+
                 return response.status(404).json({ error: `Could not find any professionals associated with '${queryParameter}' of '${queryParameterValue}'` });
               }
             })
@@ -367,20 +367,20 @@ app.get('/api/v1/professionals', (request, response) => {
         .where('insurance_provider_name', queryParameterValue)
         .select('id')
         .then(insuranceID => {
-          console.log('insuranceID: ', insuranceID);
+
           database('professional_insurance_providers')
             .where('insurance_provider_id', insuranceID[0].id)
             .select('professional_id')
             .then(profsWithInsurance => {
               if (profsWithInsurance.length > 0) {
                 const profIdArray = profsWithInsurance.map(profObject => profObject.professional_id);
-                console.log('profIdArray: ', profIdArray);
+
                 getProfessionalInsSpec(profIdArray)
                   .then(profsInsSpec => {
                     return response.status(200).json({ professionals: profsInsSpec });
                   });
               } else {
-                console.log('empty');
+
                 return response.status(404).json({ error: `Could not find any professionals associated with '${queryParameter}' of '${queryParameterValue}'` });
               }
             })
