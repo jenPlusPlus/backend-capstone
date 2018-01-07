@@ -51,7 +51,7 @@ const getProfessionalInsSpec = (profIDs) => {
   });
 
   return Promise.all(promiseArray).then(results => {
-    console.log('results: ', results);
+
     const populatedResults = results.filter(item => item.length > 0);
     if (populatedResults.length > 0) {
       const cleanedResults = results.map(singleProfArray => {
@@ -176,7 +176,10 @@ app.get('/api/v1/users', (request, response) => {
                   .then(usersAndChallenges => {
                     return response.status(200).json({ users: usersAndChallenges });
                   });
-              } //end if usersWithChallenges length
+              } else {
+                console.log('empty');
+                return response.status(404).json({ error: `Could not find any users associated with '${queryParameter}' of '${queryParameterValue}'` });
+              }
             }) // end user_challenges then
             .catch(error => response.status(500).json({ error }));
         })
@@ -348,8 +351,12 @@ app.get('/api/v1/professionals', (request, response) => {
                 console.log('profIdArray: ', profIdArray);
                 getProfessionalInsSpec(profIdArray)
                   .then(profsInsSpec => {
+                    console.log('profsInsSpec: ', profsInsSpec);
                     return response.status(200).json({ professionals: profsInsSpec });
                   });
+              } else {
+                console.log('empty');
+                return response.status(404).json({ error: `Could not find any professionals associated with '${queryParameter}' of '${queryParameterValue}'` });
               }
             })
             .catch(error => response.status(500).json({ error }));
@@ -372,6 +379,9 @@ app.get('/api/v1/professionals', (request, response) => {
                   .then(profsInsSpec => {
                     return response.status(200).json({ professionals: profsInsSpec });
                   });
+              } else {
+                console.log('empty');
+                return response.status(404).json({ error: `Could not find any professionals associated with '${queryParameter}' of '${queryParameterValue}'` });
               }
             })
             .catch(error => response.status(500).json({ error }));
