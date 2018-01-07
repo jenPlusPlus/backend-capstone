@@ -41,16 +41,44 @@ app.get('/', (request, response) => {
 
 const getProfessionalInsSpec = (profIDs) => {
   const promiseArray = profIDs.map(profID => {
-    database('professionals')
+    return database('professionals')
+      .where('professionals.id', profID)
       .leftJoin('professional_specialties', 'professionals.id', '=', 'professional_specialties.professional_id')
       .leftJoin('specialties', 'specialties.id', '=', 'professional_specialties.specialty_id')
       .leftJoin('professional_insurance_providers', 'professionals.id', '=', 'professional_insurance_providers.professional_id')
       .leftJoin('insurance_providers', 'insurance_providers.id', '=', 'professional_insurance_providers.insurance_provider_id')
-      .select('professionals.*', 'insurance_providers.insurance_provider_name', 'specialties.specialty_name')
+      .select('professionals.*', 'insurance_providers.insurance_provider_name', 'specialties.specialty_name');
   });
 
   return Promise.all(promiseArray).then(results => {
-    console.log('results: ', results);
+    console.log('results: ', results[15]);
+    const populatedResults = results.filter(item => item.length > 0);
+    if (populatedResults.length > 0) {
+      const cleanedResults = results.map(singleProfArray => {
+        const professional = Object.assign({}, {
+          id: singleProfArray[0].id,
+          professional_name: singleProfArray[0].professional_name,
+          professional_image: singleProfArray[0].professional_image,
+          professional_location: singleProfArray[0].professional_location,
+          professional_email: singleProfArray[0].professional_email,
+          professional_phone: singleProfArray[0].professional_phone,
+          professional_insurance_providers: [],
+          professional_specialties: []
+        });
+        const allSpecialtyNames = singleProfArray.map(prof => prof.specialty_name);
+        const cleanedSpecialtyNames = allSpecialtyNames.filter(specialtyName => specialtyName !== null);
+        const uniqueSpecialtyNames = Array.from(new Set(cleanedSpecialtyNames));
+        professional.professional_specialties = uniqueSpecialtyNames;
+
+        const allInsuranceNames = singleProfArray.map(prof => prof.insurance_provider_name);
+        const cleanedInsuranceNames = allInsuranceNames.filter(insuranceName => insuranceName !== null);
+        const uniqueInsuranceNames = Array.from(new Set(cleanedInsuranceNames));
+        professional.professional_insurance_providers = uniqueInsuranceNames;
+
+        return professional;
+      });
+      return cleanedResults;
+    }
   });
 
 };
@@ -305,22 +333,28 @@ app.get('/api/v1/professionals', (request, response) => {
       .catch(error => response.status(500).json({ error }));
   } else {
     if (queryParameter.toLowerCase() === 'specialty') {
+
       database('specialties')
         .where('specialty_name', queryParameterValue)
         .select('id')
         .then(specialtyID => {
+          console.log('specialtyID: ', specialtyID);
           database('professional_specialties')
-            .where('specialty_id', specialtyID[0])
+            .where('specialty_id', specialtyID[0].id)
             .select('professional_id')
             .then(profsWithSpecialties => {
               if (profsWithSpecialties.length > 0) {
                 const profIdArray = profsWithSpecialties.map(profObject => profObject.professional_id);
+                console.log('profIdArray: ', profIdArray);
                 getProfessionalInsSpec(profIdArray)
+                  .then(profsInsSpec => {
+                    return response.status(200).json({ professionals: profsInsSpec });
+                  });
               }
             })
-            .catch()
+            .catch(error => response.status(500).json({ error }))
         })
-        .catch()
+        .catch(error => response.status(500).json({ error }))
     } else if (queryParameter.toLowerCase() === 'insurance_provider') {
 
     } else {
