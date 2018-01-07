@@ -15,8 +15,7 @@ app.set('port', process.env.PORT || 3000);
 // set up for future use
 // app.set('secretKey', process.env.SECRET_KEY);
 
-// change title when we've decided on application name
-app.locals.title = 'Capstone';
+app.locals.title = 'Mental Healthy Backend';
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -40,6 +39,7 @@ app.get('/', (request, response) => {
   response.send(`It's the backend!`);
 });
 
+<<<<<<< HEAD
 const getProfInsSpec = (profIDs) => {
   const promiseArray = profIDs.map(profID => {
     database('professionals')
@@ -55,6 +55,42 @@ const getProfInsSpec = (profIDs) => {
 };
 
 
+=======
+const getUsersAndChallenges = (userIds) => {
+
+  const promiseArray = userIds.map(userId =>
+    database('users')
+      .where('users.id', userId)
+      .leftJoin('user_challenges', 'users.id', '=', 'user_challenges.user_id')
+      .leftJoin('challenges', 'challenges.id', '=', 'user_challenges.challenge_id')
+      .select('users.*', 'challenges.challenge_name')
+  );
+
+  return Promise.all(promiseArray).then(results => {
+    const populatedResults = results.filter(item => item.length > 0);
+    if (populatedResults.length > 0) {
+      const cleanedResults = results.map(singleUserArray => {
+        const user = Object.assign({}, {
+          id: singleUserArray[0].id,
+          user_name: singleUserArray[0].user_name,
+          user_image: singleUserArray[0].user_image,
+          user_about: singleUserArray[0].user_about,
+          user_location: singleUserArray[0].user_location,
+          user_email: singleUserArray[0].user_email,
+          user_challenges: []
+        });
+        const allChallengeNames = singleUserArray.map(user => user.challenge_name);
+        const cleanedChallengeNames = allChallengeNames.filter(challengeName => challengeName !== null);
+        user.user_challenges = cleanedChallengeNames;
+
+        return user;
+      });
+      return cleanedResults;
+    }
+  });
+};
+
+>>>>>>> 957b7a297a6196172ca73f14f2c54e4e0fc764a0
 // begin /users
 app.get('/api/v1/users', (request, response) => {
   const queryParameter = Object.keys(request.query)[0];
@@ -97,14 +133,46 @@ app.get('/api/v1/users', (request, response) => {
       })
       .catch(error => response.status(500).json({ error }));
   } else {
-    database('users').where(queryParameter.toLowerCase(), queryParameterValue).select()
-      .then(users => {
-        if (!users.length) {
-          return response.status(404).json({ error: `Could not find any users associated with '${queryParameter}' of '${queryParameterValue}'` });
-        }
-        return response.status(200).json({ users });
-      })
-      .catch(error => response.status(500).json({ error }));
+    // if there's a query
+    if (queryParameter.toLowerCase() === 'user_challenge') {
+      // query is challenges
+      database('challenges')
+        .where('challenge_name', queryParameterValue)
+        .select('id')
+        .then(challengeID => {
+          database('user_challenges')
+            .where('challenge_id', challengeID[0].id)
+            .select('user_id')
+            .then(usersWithChallenges => {
+              if (usersWithChallenges.length > 0) {
+                const userIdArray = usersWithChallenges.map(userObject => userObject.user_id);
+                getUsersAndChallenges(userIdArray)
+                  .then(usersAndChallenges => {
+                    return response.status(200).json({ users: usersAndChallenges });
+                  });
+              } //end if usersWithChallenges length
+            }) // end user_challenges then
+            .catch(error => response.status(500).json({ error }));
+        })
+        .catch(error => response.status(500).json({ error }));
+
+    } else {
+    // query is not challenge
+      database('users')
+        .where(queryParameter.toLowerCase(), queryParameterValue)
+        .select()
+        .then(users => {
+          if (!users.length) {
+            return response.status(404).json({ error: `Could not find any users associated with '${queryParameter}' of '${queryParameterValue}'` });
+          }
+          const queryUserIDs = users.map(user => user.id);
+          getUsersAndChallenges(queryUserIDs)
+            .then(usersAndChallenges => {
+              return response.status(200).json({ users: usersAndChallenges });
+            });
+        })
+        .catch(error => response.status(500).json({ error }));
+    }
   }
 });
 
@@ -125,7 +193,6 @@ app.post('/api/v1/users', (request, response) => {
   database('users').insert(user, 'id')
     .then(insertedUserID => {
       userID = insertedUserID[0];
-
 
       if (user_challenges.length > 0) {
         userChallengeIDPromises = user_challenges.map(challenge => {
@@ -161,7 +228,7 @@ app.post('/api/v1/users', (request, response) => {
           .catch(error => response.status(500).json({ error }));
       }
 
-      response.status(201).json({ id: insertedUserID[0] });
+      return response.status(201).json({ id: insertedUserID[0] });
     })
     .catch(error => response.status(500).json({ error }));
 
@@ -251,13 +318,22 @@ app.get('/api/v1/professionals', (request, response) => {
 });
 
 app.post('/api/v1/professionals', (request, response) => {
-  const { professional_name, professional_image, professional_location, professional_specialties, professional_insurance_providers } = request.body;
-  const professional = { professional_name, professional_image, professional_location };
+  const {
+    professional_name,
+    professional_image,
+    professional_location,
+    professional_specialties,
+    professional_insurance_providers,
+    professional_email,
+    professional_phone
+  } = request.body;
+
+  const professional = { professional_name, professional_image, professional_location, professional_email, professional_phone };
   let profID;
   let specialtyIDPromises = [];
-  let specialtyIDs;
+  let specialtyIDs = [];
   let insuranceProviderIDPromises = [];
-  let insuranceProvidersIDs;
+  let insuranceProvidersIDs = [];
 
   for (const requiredParameter of ['professional_name', 'professional_location']) {
     if (!professional[requiredParameter]) {
@@ -267,68 +343,90 @@ app.post('/api/v1/professionals', (request, response) => {
 
   database('professionals').insert(professional, 'id')
     .then(insertedProfessionalID => {
-      profID = insertedProfessionalID;
+      profID = insertedProfessionalID[0];
 
       if (professional_specialties.length > 0) {
         specialtyIDPromises = professional_specialties.map(specialty => {
           return database('specialties').where('specialty_name', specialty).select('id')
             .catch(error => response.status(500).json({ error }));
         });
+
+        Promise.all(specialtyIDPromises)
+          .then(resolvedSpecialtyIDs => {
+            specialtyIDs = resolvedSpecialtyIDs.reduce((acc, resSpecialtyId) => {
+              acc.push(resSpecialtyId[0].id);
+              return acc;
+            }, []);
+            return specialtyIDs;
+          })
+          .then(results => {
+
+
+            const profSpecialties = results.map(profSpecialtyID => {
+              return {
+                professional_id: profID,
+                specialty_id: profSpecialtyID
+              };
+            });
+
+        Promise.all(specialtyIDPromises)
+          .then(resolvedSpecialtyIDs => {
+            specialtyIDs = resolvedSpecialtyIDs.reduce((acc, resSpecialtyId) => {
+              acc.push(resSpecialtyId[0].id);
+              return acc;
+            }, []);
+            return specialtyIDs;
+          })
+          .then(results => {
+
+            const profSpecialties = results.map(profSpecialtyID => {
+              return {
+                professional_id: profID,
+                specialty_id: profSpecialtyID
+              };
+            });
+
+            database('professional_specialties').insert(profSpecialties, '*')
+              .then(insertedProfessionalSpecialty => response.status(201).json({ professionalSpecialty: insertedProfessionalSpecialty }))
+              .catch(error => response.status(500).json({ error }));
+          })
+          .catch(error => response.status(500).json({ error }));
       }
 
-      Promise.all(specialtyIDPromises)
-        .then(resolvedSpecialtyIDs => {
-          specialtyIDs = resolvedSpecialtyIDs;
-        })
-        .catch(error => response.status(500).json({ error }));
+      if (professional_insurance_providers.length > 0) {
+        insuranceProviderIDPromises = professional_insurance_providers.map(insuranceProvider => {
+          return database('insurance_providers').where('insurance_provider_name', insuranceProvider).select('id')
+            .catch(error => response.status(500).json({ error }));
+        });
 
+        Promise.all(insuranceProviderIDPromises)
+          .then(resolvedinsuranceProviderIDs => {
+            insuranceProvidersIDs = resolvedinsuranceProviderIDs.reduce((acc, resInsuranceID) => {
+              acc.push(resInsuranceID[0].id);
+              return acc;
+            }, []);
+            return insuranceProvidersIDs;
+          })
+          .then(results => {
+            const profInsurances = results.map(profInsuranceID => {
+              return {
+                professional_id: profID,
+                insurance_provider_id: profInsuranceID
+              };
+            });
+            database('professional_insurance_providers').insert(profInsurances, '*')
+              .then(insertedProfessionalInsuranceProvider => {
+                return response.status(201).json({ professionalInsuranceProvider: insertedProfessionalInsuranceProvider });
+              })
+              .catch(error => response.status(500).json({ error }));
+          })
+          .catch(error => response.status(500).json({ error }));
 
-
+      }
 
       return response.status(201).json({ id: insertedProfessionalID });
     })
     .catch(error => response.status(500).json({ error }));
-
-
-
-
-
-  insuranceProviderIDPromises = professional_insurance_providers.map(insuranceProvider => {
-    return database('insurance_providers').where('insuranceProvider_name', insuranceProvider).select()
-      .then(insuranceProviders => insuranceProviders.insuranceProvider_id)
-      .catch(error => response.status(500).json({ error }));
-  });
-
-  Promise.all(insuranceProviderIDPromises)
-    .then(resolvedinsuranceProviderIDs => {
-      insuranceProvidersIDs = resolvedinsuranceProviderIDs;
-    })
-    .catch(error => response.status(500).json({ error }));
-
-
-
-  const professionalSpecialties = specialtyIDs.map(specialtyID => {
-    return {
-      professional_id: profID,
-      specialty_id: specialtyID
-    };
-  });
-
-  database('professional_specialties').insert(professionalSpecialties)
-    .then(insertedProfessionalSpecialty => response.status(201).json({ professionalSpecialty: insertedProfessionalSpecialty }))
-    .catch(error => response.status(500).json({ error }));
-
-  const professionalInsuranceProviders = insuranceProvidersIDs.map(insuranceProviderID => {
-    return {
-      professional_id: profID,
-      insuranceProvider_id: insuranceProviderID
-    };
-  });
-
-  database('professional_insurance_providers').insert(professionalInsuranceProviders)
-    .then(insertedProfessionalInsuranceProvider => response.status(201).json({ professionalInsuranceProvider: insertedProfessionalInsuranceProvider }))
-    .catch(error => response.status(500).json({ error }));
-
 });
 // end /professionals
 
@@ -340,8 +438,8 @@ app.get('/api/v1/insuranceProviders', (request, response) => {
 });
 
 app.post('/api/v1/insuranceProviders', (request, response) => {
-  const { insuranceProvider_name } = request.body;
-  const insuranceProvider = { insuranceProvider_name };
+  const { insurance_provider_name } = request.body;
+  const insuranceProvider = { insurance_provider_name };
 
   for (const requiredParameter of ['specialty_name']) {
     if (!insuranceProvider[requiredParameter]) {
@@ -403,33 +501,16 @@ app.post('/api/v1/challenges', (request, response) => {
 
 // begin /users/:userID
 app.get('/api/v1/users/:userID', (request, response) => {
-  // will return 404 if user id does not exist in user_challenges
-  database('users')
-    .where('users.id', request.params.userID)
-    .leftJoin('user_challenges', 'users.id', '=', 'user_challenges.user_id')
-    .leftJoin('challenges', 'challenges.id', '=', 'user_challenges.challenge_id')
-    .select('users.*', 'challenges.challenge_name')
-    .then(users => {
-      if (users.length) {
-        let completeUser = {user_challenges: []};
-        users.forEach(user => {
-          if (user.challenge_name) {
-            completeUser.user_challenges.push(user.challenge_name);
-          }
-        });
-        Object.assign(completeUser, {
-          id: users[0].id,
-          user_name: users[0].user_name,
-          user_image: users[0].user_image,
-          user_about: users[0].user_about,
-          user_location: users[0].user_location,
-          user_email: users[0].user_email
-        });
-        return response.status(200).json({ user: completeUser });
+  getUsersAndChallenges([request.params.userID])
+    .then(usersAndChallenges => {
+      if (usersAndChallenges) {
+        return response.status(200).json({ users: usersAndChallenges });
+      } else {
+        return response.status(404).json({ error: `Could not find any user associated with id ${request.params.userID}.`});
       }
-      return response.status(404).json({ error: `Could not find any user associated with id ${request.params.userID}.`});
     })
     .catch(error => response.status(500).json({ error }));
+
 });
 
 app.delete('/api/v1/users/:userID', (request, response) => {
@@ -443,10 +524,49 @@ app.delete('/api/v1/users/:userID', (request, response) => {
 
 // begin /professionals/:professionalID
 app.get('/api/v1/professionals/:professionalID', (request, response) => {
-  database('professionals').where('id', request.params.professionalID).select()
+  database('professionals')
+    .where('professionals.id', request.params.professionalID)
+    .leftJoin('professional_specialties', 'professionals.id', '=', 'professional_specialties.professional_id')
+    .leftJoin('specialties', 'specialties.id', '=', 'professional_specialties.specialty_id')
+    .leftJoin('professional_insurance_providers', 'professionals.id', '=', 'professional_insurance_providers.professional_id')
+    .leftJoin('insurance_providers', 'insurance_providers.id', '=', 'professional_insurance_providers.insurance_provider_id')
+    .select('professionals.*', 'insurance_providers.insurance_provider_name', 'specialties.specialty_name')
     .then(professionals => {
       if (professionals.length) {
-        return response.status(200).json({ professional: professionals[0] });
+
+        let completeProfessional = {
+          professional_insurance_providers: [],
+          professional_specialties: []
+        };
+        professionals.forEach(professional => {
+          if (professional.insurance_provider_name) {
+
+            const providerIndex = completeProfessional.professional_insurance_providers
+              .findIndex( provider => professional.insurance_provider_name === provider);
+
+            if (providerIndex === -1) {
+              completeProfessional.professional_insurance_providers.push(professional.insurance_provider_name);
+            }
+          }
+          if (professional.specialty_name) {
+
+            const specialtyIndex = completeProfessional.professional_specialties
+              .findIndex( specialty => professional.specialty_name === specialty);
+
+            if (specialtyIndex === -1) {
+              completeProfessional.professional_specialties.push(professional.specialty_name);
+            }
+          }
+        });
+        Object.assign(completeProfessional, {
+          id: professionals[0].id,
+          professional_name: professionals[0].professional_name,
+          professional_image: professionals[0].professional_image,
+          professional_location: professionals[0].professional_location,
+          professional_email: professionals[0].professional_email,
+          professional_phone: professionals[0].professional_phone
+        });
+        return response.status(200).json({ professional: completeProfessional });
       }
       return response.status(404).json({ error: `Could not find any professional associated with id ${request.params.professionalID}.`});
     })
@@ -527,10 +647,13 @@ app.delete('/api/v1/challenges/:challengeID', (request, response) => {
 
 // begin /favoriteUsers/:userID
 app.get('/api/v1/favoriteUsers/:userID', (request, response) => {
-  database('favorite_users').where('user_id', request.params.userID).select()
+  database('favorite_users')
+    .where('favorite_users.user_id', request.params.userID)
+    .join('users', 'favorite_users.favorite_user_id', '=', 'users.id')
+    .select('users.*')
     .then(favoriteUsers => {
       if (favoriteUsers.length) {
-        return response.status(200).json({ favoriteUsers: favoriteUsers[0] });
+        return response.status(200).json({ favoriteUsers: favoriteUsers });
       }
       return response.status(404).json({ error: `Could not find any favorite users for user id ${request.params.userID}.`});
     })
@@ -574,10 +697,13 @@ app.delete('/api/v1/favoriteUsers/:userID/:favoriteUserID', (request, response) 
 
 // begin /favoriteProfessionals/:userID
 app.get('/api/v1/favoriteProfessionals/:userID', (request, response) => {
-  database('favorite_professionals').where('user_id', request.params.userID).select()
+  database('favorite_professionals')
+    .where('favorite_professionals.user_id', request.params.userID)
+    .join('professionals', 'favorite_professionals.favorite_professional_id', '=', 'professionals.id')
+    .select('professionals.*')
     .then(favoriteProfessionals => {
       if (favoriteProfessionals.length) {
-        return response.status(200).json({ favoriteUsers: favoriteProfessionals[0] });
+        return response.status(200).json({ favoriteProfessionals: favoriteProfessionals });
       }
       return response.status(404).json({ error: `Could not find any favorite professionals for user id ${request.params.userID}.`});
     })
