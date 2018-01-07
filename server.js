@@ -39,6 +39,22 @@ app.get('/', (request, response) => {
   response.send(`It's the backend!`);
 });
 
+const getProfessionalInsSpec = (profIDs) => {
+  const promiseArray = profIDs.map(profID => {
+    database('professionals')
+      .leftJoin('professional_specialties', 'professionals.id', '=', 'professional_specialties.professional_id')
+      .leftJoin('specialties', 'specialties.id', '=', 'professional_specialties.specialty_id')
+      .leftJoin('professional_insurance_providers', 'professionals.id', '=', 'professional_insurance_providers.professional_id')
+      .leftJoin('insurance_providers', 'insurance_providers.id', '=', 'professional_insurance_providers.insurance_provider_id')
+      .select('professionals.*', 'insurance_providers.insurance_provider_name', 'specialties.specialty_name')
+  });
+
+  return Promise.all(promiseArray).then(results => {
+    console.log('results: ', results);
+  });
+
+};
+
 const getUsersAndChallenges = (userIds) => {
 
   const promiseArray = userIds.map(userId =>
@@ -288,14 +304,36 @@ app.get('/api/v1/professionals', (request, response) => {
       })
       .catch(error => response.status(500).json({ error }));
   } else {
-    database('professionals').where(queryParameter.toLowerCase(), queryParameterValue).select()
-      .then(professionals => {
-        if (!professionals.length) {
-          return response.status(404).json({ error: `Could not find any professionals associated with '${queryParameter}' of '${queryParameterValue}'` });
-        }
-        return response.status(200).json({ professionals });
-      })
-      .catch(error => response.status(500).json({ error }));
+    if (queryParameter.toLowerCase() === 'specialty') {
+      database('specialties')
+        .where('specialty_name', queryParameterValue)
+        .select('id')
+        .then(specialtyID => {
+          database('professional_specialties')
+            .where('specialty_id', specialtyID[0])
+            .select('professional_id')
+            .then(profsWithSpecialties => {
+              if (profsWithSpecialties.length > 0) {
+                const profIdArray = profsWithSpecialties.map(profObject => profObject.professional_id);
+                getProfessionalInsSpec(profIdArray)
+              }
+            })
+            .catch()
+        })
+        .catch()
+    } else if (queryParameter.toLowerCase() === 'insurance_provider') {
+
+    } else {
+      // need to join with specialty & insurance
+      database('professionals').where(queryParameter.toLowerCase(), queryParameterValue).select()
+        .then(professionals => {
+          if (!professionals.length) {
+            return response.status(404).json({ error: `Could not find any professionals associated with '${queryParameter}' of '${queryParameterValue}'` });
+          }
+          return response.status(200).json({ professionals });
+        })
+        .catch(error => response.status(500).json({ error }));
+    }
   }
 });
 
