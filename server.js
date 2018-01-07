@@ -333,6 +333,23 @@ app.post('/api/v1/professionals', (request, response) => {
             .catch(error => response.status(500).json({ error }));
         });
 
+        Promise.all(specialtyIDPromises)
+          .then(resolvedSpecialtyIDs => {
+            specialtyIDs = resolvedSpecialtyIDs.reduce((acc, resSpecialtyId) => {
+              acc.push(resSpecialtyId[0].id);
+              return acc;
+            }, []);
+            return specialtyIDs;
+          })
+          .then(results => {
+
+
+            const profSpecialties = results.map(profSpecialtyID => {
+              return {
+                professional_id: profID,
+                specialty_id: profSpecialtyID
+              };
+            });
 
         Promise.all(specialtyIDPromises)
           .then(resolvedSpecialtyIDs => {
@@ -403,8 +420,8 @@ app.get('/api/v1/insuranceProviders', (request, response) => {
 });
 
 app.post('/api/v1/insuranceProviders', (request, response) => {
-  const { insuranceProvider_name } = request.body;
-  const insuranceProvider = { insuranceProvider_name };
+  const { insurance_provider_name } = request.body;
+  const insuranceProvider = { insurance_provider_name };
 
   for (const requiredParameter of ['specialty_name']) {
     if (!insuranceProvider[requiredParameter]) {
