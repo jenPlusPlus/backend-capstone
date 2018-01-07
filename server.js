@@ -617,7 +617,6 @@ app.get('/api/v1/favoriteUsers/:userID', (request, response) => {
     .join('users', 'favorite_users.favorite_user_id', '=', 'users.id')
     .select('users.*')
     .then(favoriteUsers => {
-      console.log('favoriteUsers: ', favoriteUsers);
       if (favoriteUsers.length) {
         return response.status(200).json({ favoriteUsers: favoriteUsers });
       }
