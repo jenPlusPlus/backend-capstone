@@ -587,6 +587,12 @@ app.delete('/api/v1/users/:userID', (request, response) => {
     .then(() => response.status(204).json( { userID }))
     .catch(() => response.status(404).json({ error: `Could not find user with id '${userID}'` }));
 });
+
+app.patch('/api/v1/users/:userID', (request, response) => {
+  const userID = request.params.userID;
+  const body = { user_name, user_about, user_location, user_challenges };
+  console.log(body);
+});
 // end /users/:userID
 
 // begin /professionals/:professionalID
