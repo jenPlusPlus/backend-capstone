@@ -39,23 +39,6 @@ app.get('/', (request, response) => {
   response.send(`It's the backend!`);
 });
 
-<<<<<<< HEAD
-const getProfInsSpec = (profIDs) => {
-  const promiseArray = profIDs.map(profID => {
-    database('professionals')
-      .leftJoin('professional_specialties', 'professionals.id', '=', 'professional_specialties.professional_id')
-      .leftJoin('specialties', 'specialties.id', '=', 'professional_specialties.specialty_id')
-      .leftJoin('professional_insurance_providers', 'professionals.id', '=', 'professional_insurance_providers.professional_id')
-      .leftJoin('insurance_providers', 'insurance_providers.id', '=', 'professional_insurance_providers.insurance_provider_id')
-      .select('professionals.*', 'insurance_providers.insurance_provider_name', 'specialties.specialty_name')
-  });
-  return Promise.all(promiseArray).then(results => {
-    console.log('results: ', results);
-  });
-};
-
-
-=======
 const getUsersAndChallenges = (userIds) => {
 
   const promiseArray = userIds.map(userId =>
@@ -90,7 +73,6 @@ const getUsersAndChallenges = (userIds) => {
   });
 };
 
->>>>>>> 957b7a297a6196172ca73f14f2c54e4e0fc764a0
 // begin /users
 app.get('/api/v1/users', (request, response) => {
   const queryParameter = Object.keys(request.query)[0];
@@ -351,23 +333,6 @@ app.post('/api/v1/professionals', (request, response) => {
             .catch(error => response.status(500).json({ error }));
         });
 
-        Promise.all(specialtyIDPromises)
-          .then(resolvedSpecialtyIDs => {
-            specialtyIDs = resolvedSpecialtyIDs.reduce((acc, resSpecialtyId) => {
-              acc.push(resSpecialtyId[0].id);
-              return acc;
-            }, []);
-            return specialtyIDs;
-          })
-          .then(results => {
-
-
-            const profSpecialties = results.map(profSpecialtyID => {
-              return {
-                professional_id: profID,
-                specialty_id: profSpecialtyID
-              };
-            });
 
         Promise.all(specialtyIDPromises)
           .then(resolvedSpecialtyIDs => {
@@ -438,8 +403,8 @@ app.get('/api/v1/insuranceProviders', (request, response) => {
 });
 
 app.post('/api/v1/insuranceProviders', (request, response) => {
-  const { insurance_provider_name } = request.body;
-  const insuranceProvider = { insurance_provider_name };
+  const { insuranceProvider_name } = request.body;
+  const insuranceProvider = { insuranceProvider_name };
 
   for (const requiredParameter of ['specialty_name']) {
     if (!insuranceProvider[requiredParameter]) {
