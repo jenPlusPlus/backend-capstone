@@ -40,6 +40,35 @@ app.get('/', (request, response) => {
   response.send(`It's the backend!`);
 });
 
+const getUsersAndChallenges = (userIds) => {
+
+  const promiseArray = userIds.map(userId =>
+    database('users')
+      .where('users.id', userId)
+      .leftJoin('user_challenges', 'users.id', '=', 'user_challenges.user_id')
+      .leftJoin('challenges', 'challenges.id', '=', 'user_challenges.challenge_id')
+      .select('users.*', 'challenges.challenge_name')
+  );
+  return Promise.all(promiseArray).then(results => {
+
+    const cleanedResults = results.map(singleUserArray => {
+      const user = Object.assign({}, {
+        id: singleUserArray[0].id,
+        user_name: singleUserArray[0].user_name,
+        user_image: singleUserArray[0].user_image,
+        user_about: singleUserArray[0].user_about,
+        user_location: singleUserArray[0].user_location,
+        user_email: singleUserArray[0].user_email,
+        user_challenges: []
+      });
+      const allChallengeIds = singleUserArray.map(user => user.challenge_name);
+      user.user_challenges = allChallengeIds;
+      return user;
+    });
+    return cleanedResults;
+  });
+};
+
 // begin /users
 app.get('/api/v1/users', (request, response) => {
   const queryParameter = Object.keys(request.query)[0];
@@ -83,72 +112,28 @@ app.get('/api/v1/users', (request, response) => {
       .catch(error => response.status(500).json({ error }));
   } else {
     // if there's a query
-    console.log('queryParam: ', queryParameter);
     if (queryParameter.toLowerCase() === 'user_challenge') {
       // query is challenges
-      let challengeUsers = [];
-      let allChallengeUsers = [];
       database('challenges')
         .where('challenge_name', queryParameterValue)
         .select('id')
         .then(challengeID => {
-          console.log('challengeID: ', challengeID[0].id);
           database('user_challenges')
             .where('challenge_id', challengeID[0].id)
             .select('user_id')
             .then(usersWithChallenges => {
-              // console.log('usersWithChallenges: ', usersWithChallenges);
               if (usersWithChallenges.length > 0) {
-                usersWithChallenges.forEach(userWithChallenge => {
-                  console.log('userWithChallenge: ', userWithChallenge.user_id);
-                  database('users')
-                    .where('users.id', userWithChallenge.user_id)
-                    .leftJoin('user_challenges', 'users.id', '=', 'user_challenges.user_id')
-                    .leftJoin('challenges', 'challenges.id', '=', 'user_challenges.challenge_id')
-                    .select('users.*', 'challenges.challenge_name')
-                    .then(users => {
-
-                      console.log('users: ', users.length);
-                      allChallengeUsers = allChallengeUsers.concat(users)
-                      console.log('allChallengeUsers: ', allChallengeUsers);
-                      if (users.length) {
-                        let allCompleteUsers =[];
-                        users.forEach(user => {
-                          const completeUserIndex = allCompleteUsers.findIndex(completeUser => {
-                            return completeUser.id === user.id;
-                          });
-                          if (completeUserIndex === -1) {
-                            allCompleteUsers.push({
-                              id: user.id,
-                              user_name: user.user_name,
-                              user_image: user.user_image,
-                              user_about: user.user_about,
-                              user_location: user.user_location,
-                              user_email: user.user_email,
-                              user_challenges: []
-                            });
-                            if (user.challenge_name) {
-                              allCompleteUsers[allCompleteUsers.length - 1].user_challenges.push(user.challenge_name);
-                            }
-                          } else {
-                            if (user.challenge_name) {
-                              allCompleteUsers[completeUserIndex].user_challenges.push(user.challenge_name);
-                            }
-                          }
-                        });
-                        return response.status(200).json({ users: allCompleteUsers });
-                      }
-                      return response.status(404).json({ error: `Could not find any users associated with '${queryParameter}' of '${queryParameterValue}'` });
-                    })
-                    .catch(error => response.status(500).json({ error }));
-                })
-
-              }
-            })
+                const userIdArray = usersWithChallenges.map(userObject => userObject.user_id);
+                getUsersAndChallenges(userIdArray)
+                  .then(usersAndChallenges => {
+                    return response.status(200).json({ users: usersAndChallenges });
+                  });
+              } //end if usersWithChallenges length
+            }) // end user_challenges then
             .catch(error => response.status(500).json({ error }));
         })
         .catch(error => response.status(500).json({ error }));
-      console.log('allChallengeUsers: ', allChallengeUsers);
+
     } else {
     // query is not challenge
       database('users')
@@ -158,7 +143,11 @@ app.get('/api/v1/users', (request, response) => {
           if (!users.length) {
             return response.status(404).json({ error: `Could not find any users associated with '${queryParameter}' of '${queryParameterValue}'` });
           }
-          return response.status(200).json({ users });
+          const queryUserIDs = users.map(user => user.id);
+          getUsersAndChallenges(queryUserIDs)
+            .then(usersAndChallenges => {
+              return response.status(200).json({ users: usersAndChallenges });
+            });
         })
         .catch(error => response.status(500).json({ error }));
     }
@@ -467,6 +456,11 @@ app.get('/api/v1/users/:userID', (request, response) => {
     .select('users.*', 'challenges.challenge_name')
     .then(users => {
       if (users.length) {
+        console.log('users: ', users);
+        // getUsersAndChallenges(userIdArray)
+        //   .then(usersAndChallenges => {
+        //     return response.status(200).json({ users: usersAndChallenges });
+        //   });
         let completeUser = {user_challenges: []};
         users.forEach(user => {
           if (user.challenge_name) {
