@@ -40,6 +40,21 @@ app.get('/', (request, response) => {
   response.send(`It's the backend!`);
 });
 
+const getProfInsSpec = (profIDs) => {
+  const promiseArray = profIDs.map(profID => {
+    database('professionals')
+      .leftJoin('professional_specialties', 'professionals.id', '=', 'professional_specialties.professional_id')
+      .leftJoin('specialties', 'specialties.id', '=', 'professional_specialties.specialty_id')
+      .leftJoin('professional_insurance_providers', 'professionals.id', '=', 'professional_insurance_providers.professional_id')
+      .leftJoin('insurance_providers', 'insurance_providers.id', '=', 'professional_insurance_providers.insurance_provider_id')
+      .select('professionals.*', 'insurance_providers.insurance_provider_name', 'specialties.specialty_name')
+  });
+  return Promise.all(promiseArray).then(results => {
+    console.log('results: ', results);
+  });
+};
+
+
 // begin /users
 app.get('/api/v1/users', (request, response) => {
   const queryParameter = Object.keys(request.query)[0];
