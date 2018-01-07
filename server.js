@@ -51,7 +51,7 @@ const getProfessionalInsSpec = (profIDs) => {
   });
 
   return Promise.all(promiseArray).then(results => {
-    console.log('results: ', results[15]);
+    console.log('results: ', results);
     const populatedResults = results.filter(item => item.length > 0);
     if (populatedResults.length > 0) {
       const cleanedResults = results.map(singleProfArray => {
@@ -352,11 +352,31 @@ app.get('/api/v1/professionals', (request, response) => {
                   });
               }
             })
-            .catch(error => response.status(500).json({ error }))
+            .catch(error => response.status(500).json({ error }));
         })
-        .catch(error => response.status(500).json({ error }))
+        .catch(error => response.status(500).json({ error }));
     } else if (queryParameter.toLowerCase() === 'insurance_provider') {
-
+      database('insurance_providers')
+        .where('insurance_provider_name', queryParameterValue)
+        .select('id')
+        .then(insuranceID => {
+          console.log('insuranceID: ', insuranceID);
+          database('professional_insurance_providers')
+            .where('insurance_provider_id', insuranceID[0].id)
+            .select('professional_id')
+            .then(profsWithInsurance => {
+              if (profsWithInsurance.length > 0) {
+                const profIdArray = profsWithInsurance.map(profObject => profObject.professional_id);
+                console.log('profIdArray: ', profIdArray);
+                getProfessionalInsSpec(profIdArray)
+                  .then(profsInsSpec => {
+                    return response.status(200).json({ professionals: profsInsSpec });
+                  });
+              }
+            })
+            .catch(error => response.status(500).json({ error }));
+        })
+        .catch(error => response.status(500).json({ error }));
     } else {
       // need to join with specialty & insurance
       database('professionals').where(queryParameter.toLowerCase(), queryParameterValue).select()
