@@ -24,6 +24,7 @@ app.use(cors());
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  res.header('Access-Control-Allow-Methods', 'HEAD, GET, OPTIONS, PATCH, DELETE, POST');
   next();
 });
 
@@ -872,3 +873,6 @@ app.listen(app.get('port'), () => {
   // eslint-disable-next-line
   console.log(`${app.locals.title} is running on ${app.get('port')}`);
 });
+
+
+module.exports = app;
