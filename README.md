@@ -934,3 +934,10 @@ Status code 204.
 If no favorite professional is found, a 404 error is returned.
 
 *************************
+
+## Usage
+```
+Create a database named mental_health_app
+git clone https://github.com/jenPlusPlus/backend-capstone.git
+npm install
+```
