@@ -295,7 +295,7 @@ describe('API Routes', () => {
         .post('/api/v1/insuranceProviders')
         .send({
           id: 50,
-          insuranceProvider_name: "Humana"
+          insurance_provider_name: "Humana"
         })
         .then((response) => {
           response.should.have.status(201);
@@ -304,7 +304,7 @@ describe('API Routes', () => {
         })
         .catch((error) => { throw error; }));
 
-    it('should return a 422 if "insuranceProvider_name" is not present', () =>
+    it('should return a 422 if "insurance_provider_name" is not present', () =>
       chai.request(server)
         .post('/api/v1/insuranceProviders')
         .send({
@@ -314,7 +314,7 @@ describe('API Routes', () => {
           response.should.have.status(422);
           response.body.should.be.a('object');
           response.body.should.have.property('error');
-          response.body.error.should.equal("You are missing the 'insuranceProvider_name' property");
+          response.body.error.should.equal("You are missing the 'insurance_provider_name' property");
         })
         .catch((error) => { throw error; }));
   });

@@ -506,10 +506,10 @@ app.get('/api/v1/insuranceProviders', (request, response) => {
 });
 
 app.post('/api/v1/insuranceProviders', (request, response) => {
-  const { insuranceProvider_name } = request.body;
-  const insuranceProvider = { insuranceProvider_name };
+  const { insurance_provider_name } = request.body;
+  const insuranceProvider = { insurance_provider_name };
 
-  for (const requiredParameter of ['insuranceProvider_name']) {
+  for (const requiredParameter of ['insurance_provider_name']) {
     if (!insuranceProvider[requiredParameter]) {
       return response.status(422).json({ error: `You are missing the '${requiredParameter}' property` });
     }
