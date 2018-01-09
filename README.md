@@ -4,11 +4,14 @@
 
 This repo provides a server and database to support a front-end application for mental health support.
 
-[Heroku Deployment](https://mental-healthy-backend.herokuapp.com/)
+[Backend Heroku Deployment](https://mental-healthy-backend.herokuapp.com/)
 
 It's currently in use to support Mental Healthy, an app to search for and connect with mental health professionals and friends in your area.
 
-[Heroku Deployment](https://mentalhealthy.herokuapp.com/)
+[Frontend Heroku Deployment](https://mentalhealthy.herokuapp.com/)
+
+Find the frontend repo here:
+[Mental Healthy Fronted Repo](https://github.com/lolakoala/frontend-capstone)
 
 **************
 
