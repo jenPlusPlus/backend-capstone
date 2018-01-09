@@ -8,6 +8,14 @@ This repo provides a server and database to support a front-end application for 
 
 **************
 
+## Usage
+```
+Create a database named mental_health_app
+git clone https://github.com/jenPlusPlus/backend-capstone.git
+npm install
+```
+**************
+
 ## Schema
 
 ![screen shot 2018-01-09 at 12 06 17 pm](https://user-images.githubusercontent.com/6845268/34738230-9cf6fb34-f535-11e7-9947-b348688e4796.png)
@@ -935,9 +943,3 @@ If no favorite professional is found, a 404 error is returned.
 
 *************************
 
-## Usage
-```
-Create a database named mental_health_app
-git clone https://github.com/jenPlusPlus/backend-capstone.git
-npm install
-```
