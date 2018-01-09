@@ -18,6 +18,7 @@ Find the frontend repo here:
 ## Usage
 ```
 git clone https://github.com/jenPlusPlus/backend-capstone.git
+cd backend-capstone
 npm install
 
 Create a database named mental_health_app:
