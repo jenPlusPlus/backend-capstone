@@ -4,7 +4,7 @@
 
 This repo provides a server and database to support a front-end application for mental health support.
 
-[Heroku Deployment](https://jen-adam-byob.herokuapp.com/)
+[Heroku Deployment](https://mental-healthy-backend.herokuapp.com/)
 
 **************
 
@@ -12,7 +12,7 @@ This repo provides a server and database to support a front-end application for 
 
 ### Users
 
-#### GET `users`: /api/v1/users
+#### GET `users`
 
 ##### Description
 
@@ -28,7 +28,7 @@ Returns all users in an object as an array of `users`.
 ##### Request
   
 ```
-GET users
+GET /api/v1/users
 ```
   
 ##### Return
@@ -72,3 +72,43 @@ If no users are found, a 404 error is returned. If a `user_challenge` that does 
 
 *************************
 
+#### GET `users`: /api/v1/users/:id
+
+##### Description
+
+Returns single user in an object as an array of `users`.
+
+##### Request
+  
+```
+GET /api/v1/users/105
+```
+  
+
+##### Return
+  
+```
+
+{
+    "users": [
+        {
+            "id": 105,
+            "user_name": "Jentastic",
+            "user_image": null,
+            "user_about": "I'm looking to find new ways to cope with my issues.",
+            "user_location": "Denver",
+            "user_email": "jenniferpwoodson@gmail.com",
+            "user_challenges": [
+                "Anxiety",
+                "Depression"
+            ]
+        }
+    ]
+}
+```
+
+##### Errors
+
+If no users are found, a 404 error is returned. 
+
+*************************
