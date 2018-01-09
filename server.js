@@ -776,7 +776,6 @@ app.get('/api/v1/favoriteUsers/:userID', (request, response) => {
     .join('users', 'favorite_users.favorite_user_id', '=', 'users.id')
     .select('users.*')
     .then(favoriteUsers => {
-      console.log('fave users: ', favoriteUsers);
       if (favoriteUsers.length > 0) {
         const favUserIDs = favoriteUsers.map(faveUser => faveUser.id);
         getUsersAndChallenges(favUserIDs)

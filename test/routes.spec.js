@@ -504,4 +504,312 @@ describe('API Routes', () => {
         .catch((error) => { throw error; });
     });
   });
+
+  describe('GET /api/v1/professionals/:professionalID', () => {
+    it('should get a specific professional by ID', () =>
+      chai.request(server)
+        .get('/api/v1/professionals/3')
+        .then((response) => {
+          response.should.have.status(200);
+          response.should.be.json;
+          response.body.professional.should.be.an('object');
+          response.body.professional.should.have.property('id');
+          response.body.professional.should.have.property('professional_name');
+          response.body.professional.should.have.property('professional_location');
+          response.body.professional.should.have.property('professional_email');
+          response.body.professional.should.have.property('professional_phone');
+          response.body.professional.should.have.property('professional_insurance_providers');
+          response.body.professional.should.have.property('professional_specialties');
+          response.body.professional.id.should.equal(3);
+          response.body.professional.professional_name.should.equal('Dr. Mind');
+          response.body.professional.professional_location.should.equal('Denver');
+          response.body.professional.professional_email.should.equal('mind@email.com');
+          response.body.professional.professional_phone.should.equal('555-555-1111');
+        })
+        .catch((error) => { throw error; }));
+
+    it('should return a 404 if no professionals are found', () =>
+      chai.request(server)
+        .get('/api/v1/professional/99999999')
+        .then((response) => {
+          response.should.have.status(404);
+        })
+        .catch((error) => { throw error; }));
+  });
+
+  describe('DELETE /api/v1/professionals/:professionalID', () => {
+    it.skip('should delete a specific professional by id', () =>
+      chai.request(server)
+        .del('/api/v1/professionals/3')
+        .then((response) => {
+          response.should.have.status(204);
+          response.body.id.should.equal(3);
+        })
+        .catch((error) => { throw error; }));
+
+    it.skip('should return a 404 if no professionals are found', () =>
+      chai.request(server)
+        .del('/api/v1/professionals/99999999')
+        .then((response) => {
+          response.should.have.status(404);
+          response.should.be.json;
+          response.body.error.should.equal(`Could not find any professional associated with id 99999999.`);
+        })
+        .catch((error) => { throw error; }));
+  });
+
+  describe('GET /api/v1/insuranceProviders/:insuranceProviderID', () => {
+    it('should get a specific insurance provider by ID', () =>
+      chai.request(server)
+        .get('/api/v1/insuranceProviders/1')
+        .then((response) => {
+          response.should.have.status(200);
+          response.should.be.json;
+          response.body.should.be.an('object');
+          response.body.insuranceProvider.should.have.property('id');
+          response.body.insuranceProvider.should.have.property('insurance_provider_name');
+          response.body.insuranceProvider.id.should.equal(1);
+          response.body.insuranceProvider.insurance_provider_name.should.equal('BCBS');
+        })
+        .catch((error) => { throw error; }));
+
+    it('should return a 404 if no insurance providers are found', () =>
+      chai.request(server)
+        .get('/api/v1/insuranceProviders/99999999')
+        .then((response) => {
+          response.should.have.status(404);
+          response.should.be.json;
+          response.body.error.should.equal(`Could not find any insurance provider associated with id 99999999.`);
+        })
+        .catch((error) => { throw error; }));
+  });
+
+  describe('GET /api/v1/specialties/:specialtyID', () => {
+    it('should get a specific specialty by ID', () =>
+      chai.request(server)
+        .get('/api/v1/specialties/1')
+        .then((response) => {
+          response.should.have.status(200);
+          response.should.be.json;
+          response.body.should.be.an('object');
+          response.body.specialty.should.have.property('id');
+          response.body.specialty.should.have.property('specialty_name');
+          response.body.specialty.id.should.equal(1);
+          response.body.specialty.specialty_name.should.equal('Couples');
+        })
+        .catch((error) => { throw error; }));
+
+    it('should return a 404 if no specialties are found', () =>
+      chai.request(server)
+        .get('/api/v1/specialties/99999999')
+        .then((response) => {
+          response.should.have.status(404);
+          response.should.be.json;
+          response.body.error.should.equal(`Could not find any specialty associated with id 99999999.`);
+        })
+        .catch((error) => { throw error; }));
+  });
+
+  describe('GET /api/v1/challenges/:challengeID', () => {
+    it('should get a specific challenge by ID', () =>
+      chai.request(server)
+        .get('/api/v1/challenges/1')
+        .then((response) => {
+          response.should.have.status(200);
+          response.should.be.json;
+          response.body.should.be.an('object');
+          response.body.challenge.should.have.property('id');
+          response.body.challenge.should.have.property('challenge_name');
+          response.body.challenge.id.should.equal(1);
+          response.body.challenge.challenge_name.should.equal('Depression');
+        })
+        .catch((error) => { throw error; }));
+
+    it('should return a 404 if no specialties are found', () =>
+      chai.request(server)
+        .get('/api/v1/challenges/99999999')
+        .then((response) => {
+          response.should.have.status(404);
+          response.should.be.json;
+          response.body.error.should.equal(`Could not find any challenge associated with id 99999999.`);
+        })
+        .catch((error) => { throw error; }));
+  });
+
+  describe('GET /api/v1/favoriteUsers/:userID', () => {
+    it('should get all favorite users by a user ID', () =>
+      chai.request(server)
+        .get('/api/v1/favoriteUsers/2')
+        .then((response) => {
+          response.should.have.status(200);
+          response.should.be.json;
+          response.body.should.be.an('object');
+          response.body.favoriteUsers.should.be.an('array');
+          response.body.favoriteUsers[0].should.have.property('id');
+          response.body.favoriteUsers[0].should.have.property('user_name');
+          response.body.favoriteUsers[0].should.have.property('user_about');
+          response.body.favoriteUsers[0].should.have.property('user_location');
+          response.body.favoriteUsers[0].should.have.property('user_email');
+          response.body.favoriteUsers[0].should.have.property('user_challenges');
+          response.body.favoriteUsers[0].id.should.equal(3);
+          response.body.favoriteUsers[0].user_name.should.equal('Cameron');
+          response.body.favoriteUsers[0].user_about.should.equal('blah blah blah');
+          response.body.favoriteUsers[0].user_location.should.equal('Denver');
+          response.body.favoriteUsers[0].user_email.should.equal('cam@email.com');
+        })
+        .catch((error) => { throw error; }));
+
+    it('should return a 404 if no favorite users are found', () =>
+      chai.request(server)
+        .get('/api/v1/favoriteUsers/99999999')
+        .then((response) => {
+          response.should.have.status(404);
+          response.should.be.json;
+          response.body.error.should.equal(`Could not find any favorite users for user id 99999999.`);
+        })
+        .catch((error) => { throw error; }));
+  });
+
+  describe('GET /api/v1/favoriteProfessionals/:userID', () => {
+    it('should get all favorite professionals by a user ID', () =>
+      chai.request(server)
+        .get('/api/v1/favoriteProfessionals/2')
+        .then((response) => {
+          response.should.have.status(200);
+          response.should.be.json;
+          response.body.should.be.an('object');
+          response.body.favoriteProfessionals.should.be.an('array');
+          response.body.favoriteProfessionals[0].should.have.property('id');
+          response.body.favoriteProfessionals[0].should.have.property('professional_name');
+          response.body.favoriteProfessionals[0].should.have.property('professional_location');
+          response.body.favoriteProfessionals[0].should.have.property('professional_email');
+          response.body.favoriteProfessionals[0].should.have.property('professional_phone');
+          response.body.favoriteProfessionals[0].should.have.property('professional_insurance_providers');
+          response.body.favoriteProfessionals[0].should.have.property('professional_specialties');
+          response.body.favoriteProfessionals[0].id.should.equal(3);
+          response.body.favoriteProfessionals[0].professional_name.should.equal('Dr. Mind');
+          response.body.favoriteProfessionals[0].professional_location.should.equal('Denver');
+          response.body.favoriteProfessionals[0].professional_email.should.equal('mind@email.com');
+          response.body.favoriteProfessionals[0].professional_phone.should.equal('555-555-1111');
+        })
+        .catch((error) => { throw error; }));
+
+    it('should return a 404 if no favorite professionals are found', () =>
+      chai.request(server)
+        .get('/api/v1/favoriteProfessionals/99999999')
+        .then((response) => {
+          response.should.have.status(404);
+          response.should.be.json;
+          response.body.error.should.equal(`Could not find any favorite professionals for user id 99999999.`);
+        })
+        .catch((error) => { throw error; }));
+  });
+
+  describe('POST /api/v1/favoriteUsers/:userID', () => {
+    it('should be able to add a favorite user to the database', () =>
+      chai.request(server)
+        .post('/api/v1/favoriteUsers/3')
+        .send({
+          favoriteUserID: 1
+        })
+        .then((response) => {
+          response.should.have.status(201);
+          response.body.should.be.an('object');
+          response.body.favoriteUser.should.be.an('array');
+          response.body.favoriteUser[0].should.have.property('user_id');
+          response.body.favoriteUser[0].should.have.property('favorite_user_id');
+          response.body.favoriteUser[0].user_id.should.equal(3);
+          response.body.favoriteUser[0].favorite_user_id.should.equal(1);
+
+        })
+        .catch((error) => { throw error; }));
+
+    it('should return a 422 if "favoriteUserID" is not present', () =>
+      chai.request(server)
+        .post('/api/v1/favoriteUsers/3')
+        .send({
+          favoriteUserID: ''
+        })
+        .then((response) => {
+          response.should.have.status(422);
+          response.body.should.be.a('object');
+          response.body.should.have.property('error');
+          response.body.error.should.equal("You are missing the 'favoriteUserID' property");
+        })
+        .catch((error) => { throw error; }));
+  });
+
+  describe('POST /api/v1/favoriteProfessionals/:userID', () => {
+    it('should be able to add a favorite professional to the database', () =>
+      chai.request(server)
+        .post('/api/v1/favoriteProfessionals/3')
+        .send({
+          favoriteProfessionalID: 1
+        })
+        .then((response) => {
+          response.should.have.status(201);
+          response.body.should.be.an('object');
+          response.body.favoriteProfessional.should.be.an('array');
+          response.body.favoriteProfessional[0].should.have.property('user_id');
+          response.body.favoriteProfessional[0].should.have.property('favorite_professional_id');
+          response.body.favoriteProfessional[0].user_id.should.equal(3);
+          response.body.favoriteProfessional[0].favorite_professional_id.should.equal(1);
+
+        })
+        .catch((error) => { throw error; }));
+
+    it('should return a 422 if "favoriteProfessionalID" is not present', () =>
+      chai.request(server)
+        .post('/api/v1/favoriteProfessionals/3')
+        .send({
+          favoriteUserID: ''
+        })
+        .then((response) => {
+          response.should.have.status(422);
+          response.body.should.be.a('object');
+          response.body.should.have.property('error');
+          response.body.error.should.equal("You are missing the 'favoriteProfessionalID' property");
+        })
+        .catch((error) => { throw error; }));
+  });
+
+  describe('DELETE /api/v1/favoriteUsers/:userID/:favoriteUserID', () => {
+    it('should delete a favorite user by id', () =>
+      chai.request(server)
+        .del('/api/v1/favoriteUsers/2/3')
+        .then((response) => {
+          response.should.have.status(204);
+        })
+        .catch((error) => { throw error; }));
+
+    it.skip('should return a 404 if no users are found', () =>
+      chai.request(server)
+        .del('/api/v1/favoriteUsers/25/99999999')
+        .then((response) => {
+          response.should.have.status(404);
+          response.should.be.json;
+          response.body.error.should.equal(`Could not find favorite user with id '99999999' for user id 2`);
+        })
+        .catch((error) => { throw error; }));
+  });
+
+  describe('DELETE /api/v1/favoriteProfessionals/:userID/:favoriteProfessionalID', () => {
+    it('should delete a favorite professional by id', () =>
+      chai.request(server)
+        .del('/api/v1/favoriteProfessionals/2/3')
+        .then((response) => {
+          response.should.have.status(204);
+        })
+        .catch((error) => { throw error; }));
+
+    it.skip('should return a 404 if no users are found', () =>
+      chai.request(server)
+        .del('/api/v1/favoriteProfessionals/25/99999999')
+        .then((response) => {
+          response.should.have.status(404);
+          response.should.be.json;
+          response.body.error.should.equal(`Could not find favorite user with id '99999999' for user id 2`);
+        })
+        .catch((error) => { throw error; }));
+  });
 });
