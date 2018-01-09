@@ -1,10 +1,41 @@
-# backend-capstone
+# Mental Healthy Backend (backend-capstone)
 
 ## About
 
 This repo provides a server and database to support a front-end application for mental health support.
 
-[Heroku Deployment](https://mental-healthy-backend.herokuapp.com/)
+[Backend Heroku Deployment](https://mental-healthy-backend.herokuapp.com/)
+
+It's currently in use to support Mental Healthy, an app to search for and connect with mental health professionals and friends in your area.
+
+[Frontend Heroku Deployment](https://mentalhealthy.herokuapp.com/)
+
+Find the frontend repo here:
+[Mental Healthy Fronted Repo](https://github.com/lolakoala/frontend-capstone)
+
+**************
+
+## Usage
+```
+git clone https://github.com/jenPlusPlus/backend-capstone.git
+cd backend-capstone
+npm install
+
+Create a database named mental_health_app:
+$ psql
+CREATE DATABASE mental_health_app;
+
+Migrate the database:
+knex migrate:latest
+
+Seed the database:
+knex seed:run
+```
+**************
+
+## Schema
+
+![screen shot 2018-01-09 at 12 06 17 pm](https://user-images.githubusercontent.com/6845268/34738230-9cf6fb34-f535-11e7-9947-b348688e4796.png)
 
 **************
 
@@ -928,3 +959,4 @@ Status code 204.
 If no favorite professional is found, a 404 error is returned.
 
 *************************
+
