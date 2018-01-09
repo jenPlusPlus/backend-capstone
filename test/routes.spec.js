@@ -76,7 +76,7 @@ describe('API Routes', () => {
           response.should.have.status(200);
           response.should.be.json;
           response.body.should.be.an('object');
-          response.body.users.length.should.equal(2);
+          response.body.users.length.should.equal(1);
           response.body.users.should.be.an('array');
           response.body.users[0].should.have.property('id');
           response.body.users[0].should.have.property('user_name');
@@ -317,5 +317,191 @@ describe('API Routes', () => {
           response.body.error.should.equal("You are missing the 'insuranceProvider_name' property");
         })
         .catch((error) => { throw error; }));
+  });
+
+  describe('GET /api/v1/specialties', () => {
+    it('should get all specialties', () =>
+      chai.request(server)
+        .get('/api/v1/specialties')
+        .then((response) => {
+          response.should.have.status(200);
+          response.should.be.json;
+          response.body.should.be.an('object');
+          response.body.specialties.length.should.equal(3);
+          response.body.specialties.should.be.an('array');
+          response.body.specialties[0].should.have.property('id');
+          response.body.specialties[0].should.have.property('specialty_name');
+          response.body.specialties[0].id.should.equal(1);
+          response.body.specialties[0].specialty_name.should.equal('Couples');
+        })
+        .catch((error) => { throw error; }));
+  });
+
+  describe('POST /api/v1/specialties', () => {
+    it.skip('should be able to add a specialty to the database', () =>
+      chai.request(server)
+        .post('/api/v1/specialties')
+        .send({
+          id: 50,
+          specialty_name: "Trauma"
+        })
+        .then((response) => {
+          response.should.have.status(201);
+          response.body.should.be.a('object');
+          response.body.should.have.property('id');
+        })
+        .catch((error) => { throw error; }));
+
+    it('should return a 422 if "specialty_name" is not present', () =>
+      chai.request(server)
+        .post('/api/v1/specialties')
+        .send({
+          id: 70
+        })
+        .then((response) => {
+          response.should.have.status(422);
+          response.body.should.be.a('object');
+          response.body.should.have.property('error');
+          response.body.error.should.equal("You are missing the 'specialty_name' property");
+        })
+        .catch((error) => { throw error; }));
+  });
+
+  describe('GET /api/v1/challenges', () => {
+    it('should get all challenges', () =>
+      chai.request(server)
+        .get('/api/v1/challenges')
+        .then((response) => {
+          response.should.have.status(200);
+          response.should.be.json;
+          response.body.should.be.an('object');
+          response.body.challenges.length.should.equal(3);
+          response.body.challenges.should.be.an('array');
+          response.body.challenges[0].should.have.property('id');
+          response.body.challenges[0].should.have.property('challenge_name');
+          response.body.challenges[0].id.should.equal(1);
+          response.body.challenges[0].challenge_name.should.equal('Depression');
+        })
+        .catch((error) => { throw error; }));
+  });
+
+  describe('POST /api/v1/challenges', () => {
+    it.skip('should be able to add a challenge to the database', () =>
+      chai.request(server)
+        .post('/api/v1/challenges')
+        .send({
+          id: 50,
+          challenge_name: "ADHD"
+        })
+        .then((response) => {
+          response.should.have.status(201);
+          response.body.should.be.a('object');
+          response.body.should.have.property('id');
+        })
+        .catch((error) => { throw error; }));
+
+    it('should return a 422 if "challenge_name" is not present', () =>
+      chai.request(server)
+        .post('/api/v1/challenges')
+        .send({
+          id: 70
+        })
+        .then((response) => {
+          response.should.have.status(422);
+          response.body.should.be.a('object');
+          response.body.should.have.property('error');
+          response.body.error.should.equal("You are missing the 'challenge_name' property");
+        })
+        .catch((error) => { throw error; }));
+  });
+
+  describe('GET /api/v1/users/:userID', () => {
+    it('should get a specific user by ID', () =>
+      chai.request(server)
+        .get('/api/v1/users/3')
+        .then((response) => {
+          response.should.have.status(200);
+          response.should.be.json;
+          response.body.should.be.an('object');
+          response.body.users.length.should.equal(1);
+          response.body.users.should.be.an('array');
+          response.body.users[0].should.have.property('id');
+          response.body.users[0].should.have.property('user_name');
+          response.body.users[0].should.have.property('user_about');
+          response.body.users[0].should.have.property('user_location');
+          response.body.users[0].should.have.property('user_email');
+          response.body.users[0].should.have.property('user_challenges');
+          response.body.users[0].id.should.equal(3);
+          response.body.users[0].user_name.should.equal('Cameron');
+          response.body.users[0].user_about.should.equal('blah blah blah');
+          response.body.users[0].user_location.should.equal('Denver');
+          response.body.users[0].user_email.should.equal('cam@email.com');
+        })
+        .catch((error) => { throw error; }));
+
+    it('should return a 404 if no users are found', () =>
+      chai.request(server)
+        .get('/api/v1/users/99999999')
+        .then((response) => {
+          response.should.have.status(404);
+          response.should.be.json;
+          response.body.error.should.equal(`Could not find any user associated with id 99999999.`);
+        })
+        .catch((error) => { throw error; }));
+  });
+
+  describe('DELETE /api/v1/users/:userID', () => {
+    it.skip('should delete a specific user by id', () =>
+      chai.request(server)
+        .del('/api/v1/users/3')
+        .then((response) => {
+          response.should.have.status(204);
+          response.body.id.should.equal(3);
+        })
+        .catch((error) => { throw error; }));
+
+    it.skip('should return a 404 if no users are found', () =>
+      chai.request(server)
+        .del('/api/v1/users/99999999')
+        .then((response) => {
+          response.should.have.status(404);
+          response.should.be.json;
+          response.body.error.should.equal(`Could not find any user associated with id 99999999.`);
+        })
+        .catch((error) => { throw error; }));
+  });
+
+  describe('PATCH /api/v1/users/:userID', () => {
+    it('should be able to update a user record', () => {
+      chai.request(server)
+        .patch('/api/v1/users/3')
+        .send({
+          user_name: "Jen",
+          user_about: "I'm looking to find new ways to cope with my issues.",
+          user_location: "Denver",
+          user_email: "jen@email.com",
+          user_challenges: ["Depression"]
+        })
+        .then((response) => {
+          response.should.have.status(202);
+          response.should.be.json;
+          response.body.player.should.be.an('object');
+          response.body.users.length.should.equal(1);
+          response.body.users.should.be.an('array');
+          response.body.users[0].should.have.property('id');
+          response.body.users[0].should.have.property('user_name');
+          response.body.users[0].should.have.property('user_about');
+          response.body.users[0].should.have.property('user_location');
+          response.body.users[0].should.have.property('user_email');
+          response.body.users[0].should.have.property('user_challenges');
+          response.body.users[0].id.should.equal(3);
+          response.body.users[0].user_name.should.equal('Jen');
+          response.body.users[0].user_about.should.equal(`I'm looking to find new ways to cope with my issues.`);
+          response.body.users[0].user_location.should.equal('Denver');
+          response.body.users[0].user_email.should.equal('jen@email.com');
+          response.body.users[0].user_challenges[0].should.equal('Depression');
+        })
+        .catch((error) => { throw error; });
+    });
   });
 });

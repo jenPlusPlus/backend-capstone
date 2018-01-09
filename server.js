@@ -555,7 +555,7 @@ app.post('/api/v1/challenges', (request, response) => {
   const { challenge_name } = request.body;
   const challenge = { challenge_name };
 
-  for (const requiredParameter of ['specialty_name']) {
+  for (const requiredParameter of ['challenge_name']) {
     if (!challenge[requiredParameter]) {
       return response.status(422).json({ error: `You are missing the '${requiredParameter}' property` });
     }

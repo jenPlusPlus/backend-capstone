@@ -170,7 +170,7 @@ exports.seed = function(knex, Promise) {
       },
       {
         user_id: 2,
-        challenge_id: 1
+        challenge_id: 2
       },
       {
         user_id: 3,
