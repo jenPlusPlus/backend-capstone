@@ -776,10 +776,14 @@ app.get('/api/v1/favoriteUsers/:userID', (request, response) => {
     .join('users', 'favorite_users.favorite_user_id', '=', 'users.id')
     .select('users.*')
     .then(favoriteUsers => {
-      if (favoriteUsers.length) {
-        return response.status(200).json({ favoriteUsers: favoriteUsers });
+      console.log('fave users: ', favoriteUsers);
+      if (favoriteUsers.length > 0) {
+        const favUserIDs = favoriteUsers.map(faveUser => faveUser.id);
+        getUsersAndChallenges(favUserIDs)
+          .then(faveUsers => response.status(200).json({ favoriteUsers: faveUsers }));
+      } else {
+        return response.status(404).json({ error: `Could not find any favorite users for user id ${request.params.userID}.`});
       }
-      return response.status(404).json({ error: `Could not find any favorite users for user id ${request.params.userID}.`});
     })
     .catch(error => response.status(500).json({ error }));
 });
@@ -827,7 +831,6 @@ app.get('/api/v1/favoriteProfessionals/:userID', (request, response) => {
     .select('professionals.*')
     .then(favoriteProfessionals => {
       if (favoriteProfessionals.length > 0) {
-        console.log('favoriteProfessionals: ', favoriteProfessionals);
         const favProfIds = favoriteProfessionals.map(fave => fave.id);
         getProfessionalInsSpec(favProfIds)
           .then(profs => {
