@@ -834,7 +834,7 @@ app.get('/api/v1/favoriteProfessionals/:userID', (request, response) => {
         getProfessionalInsSpec(favProfIds)
           .then(profs => {
             return response.status(200).json({ favoriteProfessionals: profs });
-          })
+          });
       } else {
         return response.status(404).json({ error: `Could not find any favorite professionals for user id ${request.params.userID}.`});
       }

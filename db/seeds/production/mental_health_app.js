@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 const challengeData = require('./../../../data/challengeData');
 const specialtyData = require('./../../../data/specialtyData');
 const professionalData = require('./../../../data/professionalData');

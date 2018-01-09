@@ -21,7 +21,7 @@ describe('Client Routes', () => {
         response.should.have.status(200);
         response.should.be.html;
       })
-      .catch((err) => { throw err; }));
+      .catch((error) => { throw error; }));
 
   it('should return a 404 for a route that does not exist', () =>
     chai.request(server)
@@ -29,7 +29,7 @@ describe('Client Routes', () => {
       .then((response) => {
         response.should.have.status(404);
       })
-      .catch((err) => { throw err; }));
+      .catch((error) => { throw error; }));
 });
 
 describe('API Routes', () => {
