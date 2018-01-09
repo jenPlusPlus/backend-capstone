@@ -6,13 +6,26 @@ This repo provides a server and database to support a front-end application for 
 
 [Heroku Deployment](https://mental-healthy-backend.herokuapp.com/)
 
+It's currently in use to support Mental Healthy, an app to search for and connect with mental health professionals and friends in your area.
+
+[Heroku Deployment](https://mentalhealthy.herokuapp.com/)
+
 **************
 
 ## Usage
 ```
-Create a database named mental_health_app
 git clone https://github.com/jenPlusPlus/backend-capstone.git
 npm install
+
+Create a database named mental_health_app:
+$ psql
+CREATE DATABASE mental_health_app;
+
+Migrate the database:
+knex migrate:latest
+
+Seed the database:
+knex seed:run
 ```
 **************
 
