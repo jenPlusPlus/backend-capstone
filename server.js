@@ -826,10 +826,16 @@ app.get('/api/v1/favoriteProfessionals/:userID', (request, response) => {
     .join('professionals', 'favorite_professionals.favorite_professional_id', '=', 'professionals.id')
     .select('professionals.*')
     .then(favoriteProfessionals => {
-      if (favoriteProfessionals.length) {
-        return response.status(200).json({ favoriteProfessionals: favoriteProfessionals });
+      if (favoriteProfessionals.length > 0) {
+        console.log('favoriteProfessionals: ', favoriteProfessionals);
+        const favProfIds = favoriteProfessionals.map(fave => fave.id);
+        getProfessionalInsSpec(favProfIds)
+          .then(profs => {
+            return response.status(200).json({ favoriteProfessionals: profs });
+          })
+      } else {
+        return response.status(404).json({ error: `Could not find any favorite professionals for user id ${request.params.userID}.`});
       }
-      return response.status(404).json({ error: `Could not find any favorite professionals for user id ${request.params.userID}.`});
     })
     .catch(error => response.status(500).json({ error }));
 });
