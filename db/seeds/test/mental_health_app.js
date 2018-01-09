@@ -57,7 +57,7 @@ const challengeData = [{
 
 const insuranceData = [{
   id: 1,
-  insurance_provider_name: 'Blue Cross'
+  insurance_provider_name: 'BCBS'
 },
 {
   id: 2,
@@ -142,7 +142,7 @@ exports.seed = function(knex, Promise) {
       },
       {
         professional_id: 2,
-        specialty_id: 3
+        specialty_id: 2
       },
       {
         professional_id: 3,
@@ -156,7 +156,7 @@ exports.seed = function(knex, Promise) {
       },
       {
         professional_id: 2,
-        insurance_provider_id: 3
+        insurance_provider_id: 2
       },
       {
         professional_id: 3,
@@ -170,7 +170,7 @@ exports.seed = function(knex, Promise) {
       },
       {
         user_id: 2,
-        challenge_id: 3
+        challenge_id: 2
       },
       {
         user_id: 3,

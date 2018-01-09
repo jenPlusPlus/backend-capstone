@@ -509,7 +509,7 @@ app.post('/api/v1/insuranceProviders', (request, response) => {
   const { insuranceProvider_name } = request.body;
   const insuranceProvider = { insuranceProvider_name };
 
-  for (const requiredParameter of ['specialty_name']) {
+  for (const requiredParameter of ['insuranceProvider_name']) {
     if (!insuranceProvider[requiredParameter]) {
       return response.status(422).json({ error: `You are missing the '${requiredParameter}' property` });
     }
@@ -555,7 +555,7 @@ app.post('/api/v1/challenges', (request, response) => {
   const { challenge_name } = request.body;
   const challenge = { challenge_name };
 
-  for (const requiredParameter of ['specialty_name']) {
+  for (const requiredParameter of ['challenge_name']) {
     if (!challenge[requiredParameter]) {
       return response.status(422).json({ error: `You are missing the '${requiredParameter}' property` });
     }
@@ -776,7 +776,6 @@ app.get('/api/v1/favoriteUsers/:userID', (request, response) => {
     .join('users', 'favorite_users.favorite_user_id', '=', 'users.id')
     .select('users.*')
     .then(favoriteUsers => {
-      console.log('fave users: ', favoriteUsers);
       if (favoriteUsers.length > 0) {
         const favUserIDs = favoriteUsers.map(faveUser => faveUser.id);
         getUsersAndChallenges(favUserIDs)
