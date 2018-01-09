@@ -31,3 +31,65 @@ describe('Client Routes', () => {
       })
       .catch((err) => { throw err; }));
 });
+
+describe('API Routes', () => {
+  before((done) => {
+    database.migrate.latest()
+      .then(() => done())
+      .catch((error) => { throw error; });
+  });
+
+  beforeEach((done) => {
+    database.seed.run()
+      .then(() => done())
+      .catch((error) => { throw error; });
+  });
+
+  describe('GET /api/v1/users', () => {
+    it('should get all users', () =>
+      chai.request(server)
+        .get('/api/v1/users')
+        .then((response) => {
+          response.should.have.status(200);
+          response.should.be.json;
+          response.body.should.be.an('object');
+          response.body.users.length.should.equal(3);
+          response.body.users.should.be.an('array');
+          response.body.users[0].should.have.property('id');
+          response.body.users[0].should.have.property('user_name');
+          response.body.users[0].should.have.property('user_about');
+          response.body.users[0].should.have.property('user_location');
+          response.body.users[0].should.have.property('user_email');
+          response.body.users[0].should.have.property('user_challenges');
+          response.body.users[0].id.should.equal(1);
+          response.body.users[0].user_name.should.equal('Jen');
+          response.body.users[0].user_about.should.equal('blah');
+          response.body.users[0].user_location.should.equal('Denver');
+          response.body.users[0].user_email.should.equal('jen@email.com');
+        })
+        .catch((error) => { throw error; }));
+
+    it('should get users that satisfy a query on user challenges', () =>
+      chai.request(server)
+        .get('/api/v1/users?user_challenge=Depression')
+        .then((response) => {
+          response.should.have.status(200);
+          response.should.be.json;
+          response.body.should.be.an('object');
+          response.body.users.length.should.equal(1);
+          response.body.users.should.be.an('array');
+          response.body.users[0].should.have.property('id');
+          response.body.users[0].should.have.property('user_name');
+          response.body.users[0].should.have.property('user_about');
+          response.body.users[0].should.have.property('user_location');
+          response.body.users[0].should.have.property('user_email');
+          response.body.users[0].should.have.property('user_challenges');
+          response.body.users[0].id.should.equal(1);
+          response.body.users[0].user_name.should.equal('Jen');
+          response.body.users[0].user_about.should.equal('blah');
+          response.body.users[0].user_location.should.equal('Denver');
+          response.body.users[0].user_email.should.equal('jen@email.com');
+        })
+        .catch((error) => { throw error; }));
+  });
+});
