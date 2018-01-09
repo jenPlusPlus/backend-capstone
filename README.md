@@ -1,10 +1,16 @@
-# backend-capstone
+# Mental Healthy Backend (backend-capstone)
 
 ## About
 
 This repo provides a server and database to support a front-end application for mental health support.
 
 [Heroku Deployment](https://mental-healthy-backend.herokuapp.com/)
+
+**************
+
+## Schema
+
+![screen shot 2018-01-09 at 12 06 17 pm](https://user-images.githubusercontent.com/6845268/34738230-9cf6fb34-f535-11e7-9947-b348688e4796.png)
 
 **************
 
