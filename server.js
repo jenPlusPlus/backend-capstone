@@ -509,7 +509,7 @@ app.post('/api/v1/insuranceProviders', (request, response) => {
   const { insuranceProvider_name } = request.body;
   const insuranceProvider = { insuranceProvider_name };
 
-  for (const requiredParameter of ['specialty_name']) {
+  for (const requiredParameter of ['insuranceProvider_name']) {
     if (!insuranceProvider[requiredParameter]) {
       return response.status(422).json({ error: `You are missing the '${requiredParameter}' property` });
     }

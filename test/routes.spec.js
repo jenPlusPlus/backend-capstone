@@ -270,4 +270,52 @@ describe('API Routes', () => {
         })
         .catch((error) => { throw error; }));
   });
+
+  describe('GET /api/v1/insuranceProviders', () => {
+    it('should get all insurance providers', () =>
+      chai.request(server)
+        .get('/api/v1/insuranceProviders')
+        .then((response) => {
+          response.should.have.status(200);
+          response.should.be.json;
+          response.body.should.be.an('object');
+          response.body.insuranceProviders.length.should.equal(3);
+          response.body.insuranceProviders.should.be.an('array');
+          response.body.insuranceProviders[0].should.have.property('id');
+          response.body.insuranceProviders[0].should.have.property('insurance_provider_name');
+          response.body.insuranceProviders[0].id.should.equal(1);
+          response.body.insuranceProviders[0].insurance_provider_name.should.equal('BCBS');
+        })
+        .catch((error) => { throw error; }));
+  });
+
+  describe('POST /api/v1/insuranceProviders', () => {
+    it.skip('should be able to add an insurance provider to the database', () =>
+      chai.request(server)
+        .post('/api/v1/insuranceProviders')
+        .send({
+          id: 50,
+          insuranceProvider_name: "Humana"
+        })
+        .then((response) => {
+          response.should.have.status(201);
+          response.body.should.be.a('object');
+          response.body.should.have.property('id');
+        })
+        .catch((error) => { throw error; }));
+
+    it('should return a 422 if "insuranceProvider_name" is not present', () =>
+      chai.request(server)
+        .post('/api/v1/insuranceProviders')
+        .send({
+          id: 70
+        })
+        .then((response) => {
+          response.should.have.status(422);
+          response.body.should.be.a('object');
+          response.body.should.have.property('error');
+          response.body.error.should.equal("You are missing the 'insuranceProvider_name' property");
+        })
+        .catch((error) => { throw error; }));
+  });
 });
