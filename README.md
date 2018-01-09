@@ -43,7 +43,7 @@ GET /api/v1/users
             "user_image": null,
             "user_about": "I'm looking to find new ways to cope with my issues.",
             "user_location": "Denver",
-            "user_email": "jenniferpwoodson@gmail.com",
+            "user_email": "jen@email.com",
             "user_challenges": [
                 "Anxiety",
                 "Depression"
@@ -51,11 +51,11 @@ GET /api/v1/users
         },
         {
             "id": 106,
-            "user_name": "jenny",
+            "user_name": "Dan",
             "user_image": null,
             "user_about": "i'm sad.",
             "user_location": "Denver",
-            "user_email": "nevin.jennifer@gmail.com",
+            "user_email": "dan@email.com",
             "user_challenges": [
                 "Anxiety",
                 "Bipolar",
@@ -84,7 +84,6 @@ Returns single user in an object as an array of `users`.
 GET /api/v1/users/105
 ```
   
-
 ##### Return
   
 ```
@@ -97,7 +96,7 @@ GET /api/v1/users/105
             "user_image": null,
             "user_about": "I'm looking to find new ways to cope with my issues.",
             "user_location": "Denver",
-            "user_email": "jenniferpwoodson@gmail.com",
+            "user_email": "jen@email.com",
             "user_challenges": [
                 "Anxiety",
                 "Depression"
@@ -110,5 +109,47 @@ GET /api/v1/users/105
 ##### Errors
 
 If no users are found, a 404 error is returned. 
+
+*************************
+
+#### POST `users`: /api/v1/users
+
+##### Description
+
+Adds a new user to the `users` table and adds any challenges to the `user_challenges` table. The new user's id is returned.
+
+##### Request
+  
+```
+POST /api/v1/users
+```
+
+###### Body
+
+The "user_name" property is required. Other properties are optional.
+
+```
+{
+	"user_name": "Jen",
+  "user_about": "I'm looking to find new ways to cope with my issues.",
+  "user_location": "Denver",
+  "user_email": "jen@email.com",
+	"user_challenges": ["Depression"]
+	
+}
+
+```
+
+##### Return
+  
+```
+{
+    "id": 108
+}
+```
+
+##### Errors
+
+If the user_name property is omitted, a 422 error is returned.
 
 *************************
