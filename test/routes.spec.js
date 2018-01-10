@@ -106,7 +106,7 @@ describe('API Routes', () => {
   });
 
   describe('POST /api/v1/users', () => {
-    it.skip('should be able to add a user to the database', () =>
+    it('should be able to add a user to the database', () =>
       chai.request(server)
         .post('/api/v1/users')
         .send({
@@ -234,11 +234,11 @@ describe('API Routes', () => {
   });
 
   describe('POST /api/v1/professionals', () => {
-    it.skip('should be able to add a professional to the database', () =>
+    it('should be able to add a professional to the database', () =>
       chai.request(server)
         .post('/api/v1/professionals')
         .send({
-          id: 50,
+          id: 59,
           professional_name: "Dr. Watson",
           professional_location: "Denver",
           professional_email: "watson@email.com",
@@ -290,11 +290,11 @@ describe('API Routes', () => {
   });
 
   describe('POST /api/v1/insuranceProviders', () => {
-    it.skip('should be able to add an insurance provider to the database', () =>
+    it('should be able to add an insurance provider to the database', () =>
       chai.request(server)
         .post('/api/v1/insuranceProviders')
         .send({
-          id: 50,
+          id: 100,
           insurance_provider_name: "Humana"
         })
         .then((response) => {
@@ -338,11 +338,11 @@ describe('API Routes', () => {
   });
 
   describe('POST /api/v1/specialties', () => {
-    it.skip('should be able to add a specialty to the database', () =>
+    it('should be able to add a specialty to the database', () =>
       chai.request(server)
         .post('/api/v1/specialties')
         .send({
-          id: 50,
+          id: 51,
           specialty_name: "Trauma"
         })
         .then((response) => {
@@ -356,7 +356,7 @@ describe('API Routes', () => {
       chai.request(server)
         .post('/api/v1/specialties')
         .send({
-          id: 70
+          id: 87
         })
         .then((response) => {
           response.should.have.status(422);
@@ -386,7 +386,7 @@ describe('API Routes', () => {
   });
 
   describe('POST /api/v1/challenges', () => {
-    it.skip('should be able to add a challenge to the database', () =>
+    it('should be able to add a challenge to the database', () =>
       chai.request(server)
         .post('/api/v1/challenges')
         .send({
@@ -404,7 +404,7 @@ describe('API Routes', () => {
       chai.request(server)
         .post('/api/v1/challenges')
         .send({
-          id: 70
+          id: 103
         })
         .then((response) => {
           response.should.have.status(422);
@@ -450,26 +450,26 @@ describe('API Routes', () => {
         .catch((error) => { throw error; }));
   });
 
-  describe('DELETE /api/v1/users/:userID', () => {
-    it.skip('should delete a specific user by id', () =>
-      chai.request(server)
-        .del('/api/v1/users/3')
-        .then((response) => {
-          response.should.have.status(204);
-          response.body.id.should.equal(3);
-        })
-        .catch((error) => { throw error; }));
-
-    it.skip('should return a 404 if no users are found', () =>
-      chai.request(server)
-        .del('/api/v1/users/99999999')
-        .then((response) => {
-          response.should.have.status(404);
-          response.should.be.json;
-          response.body.error.should.equal(`Could not find any user associated with id 99999999.`);
-        })
-        .catch((error) => { throw error; }));
-  });
+  // describe('DELETE /api/v1/users/:userID', () => {
+  //   it.skip('should delete a specific user by id', () =>
+  //     chai.request(server)
+  //       .del('/api/v1/users/3')
+  //       .then((response) => {
+  //         response.should.have.status(204);
+  //         response.body.id.should.equal(3);
+  //       })
+  //       .catch((error) => { throw error; }));
+  //
+  //   it.skip('should return a 404 if no users are found', () =>
+  //     chai.request(server)
+  //       .del('/api/v1/users/99999999')
+  //       .then((response) => {
+  //         response.should.have.status(404);
+  //         response.should.be.json;
+  //         response.body.error.should.equal(`Could not find any user associated with id 99999999.`);
+  //       })
+  //       .catch((error) => { throw error; }));
+  // });
 
   describe('PATCH /api/v1/users/:userID', () => {
     it('should be able to update a user record', () => {
@@ -537,26 +537,26 @@ describe('API Routes', () => {
         .catch((error) => { throw error; }));
   });
 
-  describe('DELETE /api/v1/professionals/:professionalID', () => {
-    it.skip('should delete a specific professional by id', () =>
-      chai.request(server)
-        .del('/api/v1/professionals/3')
-        .then((response) => {
-          response.should.have.status(204);
-          response.body.id.should.equal(3);
-        })
-        .catch((error) => { throw error; }));
-
-    it.skip('should return a 404 if no professionals are found', () =>
-      chai.request(server)
-        .del('/api/v1/professionals/99999999')
-        .then((response) => {
-          response.should.have.status(404);
-          response.should.be.json;
-          response.body.error.should.equal(`Could not find any professional associated with id 99999999.`);
-        })
-        .catch((error) => { throw error; }));
-  });
+  // describe('DELETE /api/v1/professionals/:professionalID', () => {
+  //   it('should delete a specific professional by id', () =>
+  //     chai.request(server)
+  //       .del('/api/v1/professionals/3')
+  //       .then((response) => {
+  //         response.should.have.status(204);
+  //         response.body.id.should.equal(3);
+  //       })
+  //       .catch((error) => { throw error; }));
+  //
+  //   it.skip('should return a 404 if no professionals are found', () =>
+  //     chai.request(server)
+  //       .del('/api/v1/professionals/99999999')
+  //       .then((response) => {
+  //         response.should.have.status(404);
+  //         response.should.be.json;
+  //         response.body.error.should.equal(`Could not find any professional associated with id 99999999.`);
+  //       })
+  //       .catch((error) => { throw error; }));
+  // });
 
   describe('GET /api/v1/insuranceProviders/:insuranceProviderID', () => {
     it('should get a specific insurance provider by ID', () =>
@@ -782,34 +782,38 @@ describe('API Routes', () => {
         })
         .catch((error) => { throw error; }));
 
-    it.skip('should return a 404 if no users are found', () =>
+    it('should return a 404 if no users are found', () =>
       chai.request(server)
         .del('/api/v1/favoriteUsers/25/99999999')
         .then((response) => {
           response.should.have.status(404);
           response.should.be.json;
-          response.body.error.should.equal(`Could not find favorite user with id '99999999' for user id 2`);
+          response.body.error.should.equal(`Could not find favorite user with id '99999999' for user id 25`);
         })
         .catch((error) => { throw error; }));
   });
 
   describe('DELETE /api/v1/favoriteProfessionals/:userID/:favoriteProfessionalID', () => {
-    it('should delete a favorite professional by id', () =>
-      chai.request(server)
+    it('should delete a favorite professional by id', () => {
+      return chai.request(server)
         .del('/api/v1/favoriteProfessionals/2/3')
         .then((response) => {
           response.should.have.status(204);
         })
-        .catch((error) => { throw error; }));
+        .catch((error) => { throw error; });
+    });
 
-    it.skip('should return a 404 if no users are found', () =>
-      chai.request(server)
+
+
+    it('should return a 404 if no users are found', () => {
+      return chai.request(server)
         .del('/api/v1/favoriteProfessionals/25/99999999')
         .then((response) => {
           response.should.have.status(404);
           response.should.be.json;
-          response.body.error.should.equal(`Could not find favorite user with id '99999999' for user id 2`);
+          response.body.error.should.equal(`Could not find favorite professional with id '99999999' for user id 25`);
         })
-        .catch((error) => { throw error; }));
+        .catch((error) => { throw error; });
+    });
   });
 });

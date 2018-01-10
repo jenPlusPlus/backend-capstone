@@ -817,8 +817,14 @@ app.delete('/api/v1/favoriteUsers/:userID/:favoriteUserID', (request, response) 
     user_id: userID,
     favorite_user_id: favoriteUserID
   }).del()
-    .then(() => response.status(204).json( { favoriteUserID }))
-    .catch(() => response.status(404).json({ error: `Could not find favorite user with id '${favoriteUserID}' for user id ${userID}` }));
+    .then((numDeleted) => {
+      if (numDeleted > 0) {
+        return response.status(204).json( { favoriteUserID });
+      } else {
+        return response.status(404).json({ error: `Could not find favorite user with id '${favoriteUserID}' for user id ${userID}` });
+      }
+    })
+    .catch(() => error => response.status(500).json({ error }));
 });
 // end /favoriteUsers/:userID/:favoriteUserID
 
@@ -872,8 +878,14 @@ app.delete('/api/v1/favoriteProfessionals/:userID/:favoriteProfessionalID', (req
     user_id: userID,
     favorite_professional_id: favoriteProfessionalID
   }).del()
-    .then(() => response.status(204).json( { favoriteProfessionalID }))
-    .catch(() => response.status(404).json({ error: `Could not find favorite professional with id '${favoriteProfessionalID}' for user id ${userID}` }));
+    .then((numDeleted) => {
+      if (numDeleted > 0) {
+        return response.status(204).json( { favoriteProfessionalID });
+      } else {
+        return response.status(404).json({ error: `Could not find favorite professional with id '${favoriteProfessionalID}' for user id ${userID}` });
+      }
+    })
+    .catch(() => error => response.status(500).json({ error }));
 });
 // end /favoriteProfessionals/:userID/:favoriteProfessionalID
 

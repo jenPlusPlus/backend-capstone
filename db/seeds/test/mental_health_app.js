@@ -179,6 +179,5 @@ exports.seed = function(knex, Promise) {
         challenge_id: 2
       }]);
     })
-    .then(() => console.log('Seeding complete'))
     .catch(error => console.log(`Error seeding data: ${error}`));
 };
