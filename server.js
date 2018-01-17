@@ -390,6 +390,7 @@ app.get('/api/v1/professionals', (request, response) => {
         .catch(error => response.status(500).json({ error }));
     } else {
       // need to join with specialty & insurance
+      // not necessary right now, since frontend doesn't support these queries
       database('professionals').where(queryParameter.toLowerCase(), queryParameterValue).select()
         .then(professionals => {
           if (!professionals.length) {
