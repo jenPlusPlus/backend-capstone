@@ -1,4 +1,6 @@
 const express = require('express');
+const multiparty = require('multiparty');
+const fs = require('fs');
 // will this be necessary? see app.use(express.static)
 // const path = require('path');
 
@@ -36,9 +38,29 @@ const database = require('knex')(configuration);
 // how do we change it to serve files from our other repo?
 // app.use(express.static(path.join(__dirname, '/public')));
 
-app.get('/', (request, response) => {
-  response.send(`It's the backend!`);
-});
+app.use(express.static(__dirname + '/public'));
+
+
+const saveImage = (req, res) => {
+  console.log('saveImage request : ', req, '\n\n\n\n\n');
+  // let form = new multiparty.Form();
+  //
+  // form.parse(req, (error, fields, files) => {
+  //   console.log('saveImage files: ', files);
+  //   let {path: tempPath, originalFilename} = files.imageFile[0];
+  //   let copyToPath = "./images/" + originalFilename;
+  //
+  //   fs.readFile(tempPath, (error, image) => {
+  //     // make copy of image to new location
+  //     fs.writeFile(newPath, image, (error) => {
+  //       // delete temp image
+  //       fs.unlink(tmpPath, () => {
+  //         res.send("File uploaded to: " + newPath);
+  //       });
+  //     });
+  //   });
+  // })
+};
 
 const getProfessionalInsSpec = (profIDs) => {
   const promiseArray = profIDs.map(profID => {
@@ -206,7 +228,8 @@ app.get('/api/v1/users', (request, response) => {
   }
 });
 
-app.post('/api/v1/users', (request, response) => {
+app.post('/api/v1/users', saveImage, (request, response) => {
+  console.log('post request: ', request, '\n\n\n\n\n');
   const { user_name, user_image, user_about, user_location, user_email, user_challenges } = request.body;
 
   const user = { user_name, user_image, user_about, user_location, user_email };
@@ -889,6 +912,15 @@ app.delete('/api/v1/favoriteProfessionals/:userID/:favoriteProfessionalID', (req
     .catch(() => error => response.status(500).json({ error }));
 });
 // end /favoriteProfessionals/:userID/:favoriteProfessionalID
+
+// begin image save
+// app.post('/api/v1/users/:userID/image', multipartyMiddleware, function(req, res) {
+//   var file = req.files.file;
+//   console.log(file.name);
+//   console.log(file.type);
+//   console.log(file.path);
+// });
+// end image save
 
 app.listen(app.get('port'), () => {
   // eslint-disable-next-line
