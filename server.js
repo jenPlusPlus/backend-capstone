@@ -1,6 +1,6 @@
 const express = require('express');
-const multiparty = require('multiparty');
-const fs = require('fs');
+// const multiparty = require('multiparty');
+// const fs = require('fs');
 // will this be necessary? see app.use(express.static)
 // const path = require('path');
 
@@ -41,26 +41,26 @@ const database = require('knex')(configuration);
 app.use(express.static(__dirname + '/public'));
 
 
-const saveImage = (req, res) => {
-  // console.log('saveImage request : ', req, '\n\n\n\n\n');
-  // let form = new multiparty.Form();
-  //
-  // form.parse(req, (error, fields, files) => {
-  //   console.log('saveImage files: ', files);
-  //   let {path: tempPath, originalFilename} = files.imageFile[0];
-  //   let copyToPath = "./images/" + originalFilename;
-  //
-  //   fs.readFile(tempPath, (error, image) => {
-  //     // make copy of image to new location
-  //     fs.writeFile(newPath, image, (error) => {
-  //       // delete temp image
-  //       fs.unlink(tmpPath, () => {
-  //         res.send("File uploaded to: " + newPath);
-  //       });
-  //     });
-  //   });
-  // })
-};
+//const saveImage = (req, res) => {
+// console.log('saveImage request : ', req, '\n\n\n\n\n');
+// let form = new multiparty.Form();
+//
+// form.parse(req, (error, fields, files) => {
+//   console.log('saveImage files: ', files);
+//   let {path: tempPath, originalFilename} = files.imageFile[0];
+//   let copyToPath = "./images/" + originalFilename;
+//
+//   fs.readFile(tempPath, (error, image) => {
+//     // make copy of image to new location
+//     fs.writeFile(newPath, image, (error) => {
+//       // delete temp image
+//       fs.unlink(tmpPath, () => {
+//         res.send("File uploaded to: " + newPath);
+//       });
+//     });
+//   });
+// })
+//};
 
 const getProfessionalInsSpec = (profIDs) => {
   const promiseArray = profIDs.map(profID => {
