@@ -1,19 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Mental Healthy Backend</title>
+    <link rel="stylesheet" href='./styles.css'>
+    <link href="https://fonts.googleapis.com/css?family=Noticia+Text" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+
+<h1 id="mentalhealthybackendbackendcapstone">Mental Healthy Backend (backend-capstone)</h1>
+
+<h2 id="about">About</h2>
+
+<p>This project provides a server and database to support a front-end application for mental health support.</p>
+
+<p><a href="https://mental-healthy-backend.herokuapp.com/">Backend Heroku Deployment</a></p>
+
+<p>It's currently in use to support Mental Healthy, an app to search for and connect with mental health professionals and friends in your area.</p>
+
+<p><a href="https://mentalhealthy.herokuapp.com/">Frontend Heroku Deployment</a></p>
+
+<p>Find the frontend repo here:
+<a href="https://github.com/lolakoala/frontend-capstone">Mental Healthy Fronted Repo</a></p>
+
+<hr />
+
+<h2 id="usage">Usage</h2>
+
+<pre><code>git clone https://github.com/jenPlusPlus/backend-capstone.git
+cd backend-capstone
+npm install
+
+Create a database named mental_health_app:
+$ psql
+CREATE DATABASE mental_health_app;
+
+Migrate the database:
+knex migrate:latest
+
+Seed the database:
+knex seed:run
+</code></pre>
+
+<hr />
+
+<h2 id="schema">Schema</h2>
+
+<p><img src="https://user-images.githubusercontent.com/6845268/34738230-9cf6fb34-f535-11e7-9947-b348688e4796.png" alt="mental healthy database schema illustration" /></p>
+
+<hr />
+
 <h2 id="endpoints">Endpoints</h2>
 
 <h3 id="users">Users</h3>
 
-<h4 id="getusers">GET <code>users</code></h4>
+<h4 id="getusers">GET <code class="code">users</code></h4>
 
 <h5 id="description">Description</h5>
 
-<p>Returns all users in an object as an array of <code>users</code>.</p>
+<p>Returns all users in an object as an array of <code class="code">users</code>.</p>
 
 <h5 id="queryparameters">Query Parameters</h5>
 
-<p>| parameters | data type | description |
-|------------|-----------|-------------|
-| id         | integer   | unique id of user            |
-| user_challenge       | string    | user's mental health challenge            | </p>
+<table>
+  <tr>
+    <th>parameters</th>
+    <th>data type</th>
+    <th>description</th>
+  </tr>
+  <tr>
+    <td>id</td>
+    <td>integer</td>
+    <td>unique id of user</td>
+</tr>
+<tr>
+  <td>user_challenge</td>
+  <td>string</td>
+  <td>user's mental health challenge</td>
+<tr>
+</table>
 
 <h5 id="request">Request</h5>
 
@@ -56,15 +122,15 @@ GET /api/v1/users?user_challenge=OCD
 
 <h5 id="errors">Errors</h5>
 
-<p>If no users are found, a 404 error is returned. If a <code>user_challenge</code> that does not exist in the challenges table is sent as a parameter, a 500 error is returned.</p>
+<p>If no users are found, a 404 error is returned. If a <code class="code">user_challenge</code> that does not exist in the challenges table is sent as a parameter, a 500 error is returned.</p>
 
 <hr />
 
-<h4 id="getusersapiv1usersid">GET <code>users</code>: /api/v1/users/:id</h4>
+<h4 id="getusersapiv1usersid">GET <code class="code">users</code>: /api/v1/users/:id</h4>
 
 <h5 id="description-1">Description</h5>
 
-<p>Returns single user in an object as an array of <code>users</code>.</p>
+<p>Returns single user in an object as an array of <code class="code">users</code>.</p>
 
 <h5 id="request-1">Request</h5>
 
@@ -97,11 +163,11 @@ GET /api/v1/users?user_challenge=OCD
 
 <hr />
 
-<h4 id="postusersapiv1users">POST <code>users</code>: /api/v1/users</h4>
+<h4 id="postusersapiv1users">POST <code class="code">users</code>: /api/v1/users</h4>
 
 <h5 id="description-2">Description</h5>
 
-<p>Adds a new user to the <code>users</code> table and adds any challenges to the <code>user_challenges</code> table. The new user's id is returned.</p>
+<p>Adds a new user to the <code class="code">users</code> table and adds any challenges to the <code class="code">user_challenges</code> table. The new user's id is returned.</p>
 
 <h5 id="request-2">Request</h5>
 
@@ -132,15 +198,15 @@ GET /api/v1/users?user_challenge=OCD
 <h5 id="errors-2">Errors</h5>
 
 <p>If the user_name property is omitted, a 422 error is returned.
-If a <code>user_challenge</code> that does not exist in the challenges table is sent in the body, a 500 error is returned.</p>
+If a <code class="code">user_challenge</code> that does not exist in the challenges table is sent in the body, a 500 error is returned.</p>
 
 <hr />
 
-<h4 id="patchusersapiv1usersuserid">PATCH <code>users</code>: /api/v1/users/:userID</h4>
+<h4 id="patchusersapiv1usersuserid">PATCH <code class="code">users</code>: /api/v1/users/:userID</h4>
 
 <h5 id="description-3">Description</h5>
 
-<p>Update a user in the <code>users</code> table and any associated user_challenges in the <code>user_challenges</code> table. The new user is returned.</p>
+<p>Update a user in the <code class="code">users</code> table and any associated user_challenges in the <code class="code">user_challenges</code> table. The new user is returned.</p>
 
 <h5 id="request-3">Request</h5>
 
@@ -183,19 +249,36 @@ If a <code>user_challenge</code> that does not exist in the challenges table is 
 
 <h3 id="professionals">Professionals</h3>
 
-<h4 id="getprofessionals">GET <code>professionals</code></h4>
+<h4 id="getprofessionals">GET <code class="code">professionals</code></h4>
 
 <h5 id="description-4">Description</h5>
 
-<p>Returns all professionals in an object as an array of <code>professionals</code>.</p>
+<p>Returns all professionals in an object as an array of <code class="code">professionals</code>.</p>
 
-<h5 id="queryparameters-1">Query Parameters</h5>
+<h5 id="queryparameters">Query Parameters</h5>
 
-<p>| parameters | data type | description |
-|------------|-----------|-------------|
-| id         | integer   | unique id of user            |
-| specialty       | string    | professional's specialty            |
-| insurance_provider       | string    | insurance accepted by professional            | </p>
+<table>
+  <tr>
+    <th>parameters</th>
+    <th>data type</th>
+    <th>description</th>
+  </tr>
+  <tr>
+    <td>id</td>
+    <td>integer</td>
+    <td>unique id of user</td>
+  </tr>
+  <tr>
+    <td>specialty</td>
+    <td>string</td>
+    <td>professional's specialty</td>
+  </tr>
+  <tr>
+    <td>insurance_provider</td>
+    <td>string</td>
+    <td>insurance accepted by professional</td>
+  </tr>
+</table>
 
 <h5 id="request-4">Request</h5>
 
@@ -244,15 +327,15 @@ GET /api/v1/professionals?insurance_provider=BCBS
 
 <h5 id="errors-4">Errors</h5>
 
-<p>If no professionals are found, a 404 error is returned. If a <code>specialty</code> or <code>insurance_provider</code> that does not exist in the specialties/insurance_providers tables is sent as a parameter, a 500 error is returned.</p>
+<p>If no professionals are found, a 404 error is returned. If a <code class="code">specialty</code> or <code class="code">insurance_provider</code> that does not exist in the specialties/insurance_providers tables is sent as a parameter, a 500 error is returned.</p>
 
 <hr />
 
-<h4 id="getprofessionalsgetapiv1professionalsprofessionalid">GET <code>professionals</code>: GET /api/v1/professionals/:professionalID</h4>
+<h4 id="getprofessionalsgetapiv1professionalsprofessionalid">GET <code class="code">professionals</code>: GET /api/v1/professionals/:professionalID</h4>
 
 <h5 id="description-5">Description</h5>
 
-<p>Returns single professional in an object with key <code>professional</code>.</p>
+<p>Returns single professional in an object with key <code class="code">professional</code>.</p>
 
 <h5 id="request-5">Request</h5>
 
@@ -285,11 +368,11 @@ GET /api/v1/professionals?insurance_provider=BCBS
 
 <hr />
 
-<h4 id="postprofessionalsapiv1professionals">POST <code>professionals</code>: /api/v1/professionals</h4>
+<h4 id="postprofessionalsapiv1professionals">POST <code class="code">professionals</code>: /api/v1/professionals</h4>
 
 <h5 id="description-6">Description</h5>
 
-<p>Adds a new professional to the <code>professionals</code> table and adds any specialtys to the <code>professional_specialties</code> table and insurance providers to the <code>insurance_providers</code> table. The new professional's id is returned.</p>
+<p>Adds a new professional to the <code class="code">professionals</code> table and adds any specialtys to the <code class="code">professional_specialties</code> table and insurance providers to the <code class="code">insurance_providers</code> table. The new professional's id is returned.</p>
 
 <h5 id="request-6">Request</h5>
 
@@ -322,17 +405,17 @@ GET /api/v1/professionals?insurance_provider=BCBS
 <h5 id="errors-6">Errors</h5>
 
 <p>If the professional<em>name or professional</em>location property is omitted, a 422 error is returned.
-If a <code>specialty</code> or <code>insurance_provider</code> that does not exist in the specialties/insurance_providers tables is sent in the body, a 500 error is returned.</p>
+If a <code class="code">specialty</code> or <code class="code">insurance_provider</code> that does not exist in the specialties/insurance_providers tables is sent in the body, a 500 error is returned.</p>
 
 <hr />
 
 <h3 id="insuranceproviders">Insurance Providers</h3>
 
-<h4 id="getinsuranceproviders">GET <code>insuranceProviders</code></h4>
+<h4 id="getinsuranceproviders">GET <code class="code">insuranceProviders</code></h4>
 
 <h5 id="description-7">Description</h5>
 
-<p>Returns all insurance providers in an object as an array of <code>insuranceProviders</code>.</p>
+<p>Returns all insurance providers in an object as an array of <code class="code">insuranceProviders</code>.</p>
 
 <h5 id="request-7">Request</h5>
 
@@ -361,11 +444,11 @@ If a <code>specialty</code> or <code>insurance_provider</code> that does not exi
 
 <hr />
 
-<h4 id="getinsuranceprovidersgetapiv1insuranceprovidersinsuranceproviderid">GET <code>insuranceProviders</code>: GET /api/v1/insuranceProviders/:insuranceProviderID</h4>
+<h4 id="getinsuranceprovidersgetapiv1insuranceprovidersinsuranceproviderid">GET <code class="code">insuranceProviders</code>: GET /api/v1/insuranceProviders/:insuranceProviderID</h4>
 
 <h5 id="description-8">Description</h5>
 
-<p>Returns single insurance provider in an object with key <code>insuranceProvider</code>.</p>
+<p>Returns single insurance provider in an object with key <code class="code">insuranceProvider</code>.</p>
 
 <h5 id="request-8">Request</h5>
 
@@ -390,11 +473,11 @@ If a <code>specialty</code> or <code>insurance_provider</code> that does not exi
 
 <hr />
 
-<h4 id="postinsuranceprovidersapiv1insuranceproviders">POST <code>insuranceProviders</code>: /api/v1/insuranceProviders</h4>
+<h4 id="postinsuranceprovidersapiv1insuranceproviders">POST <code class="code">insuranceProviders</code>: /api/v1/insuranceProviders</h4>
 
 <h5 id="description-9">Description</h5>
 
-<p>Adds a new insurance provider to the <code>insurance_providers</code> table. The new insurance provider's id is returned.</p>
+<p>Adds a new insurance provider to the <code class="code">insurance_providers</code> table. The new insurance provider's id is returned.</p>
 
 <h5 id="request-9">Request</h5>
 
@@ -428,11 +511,11 @@ If a <code>specialty</code> or <code>insurance_provider</code> that does not exi
 
 <h3 id="specialties">Specialties</h3>
 
-<h4 id="getspecialties">GET <code>specialties</code></h4>
+<h4 id="getspecialties">GET <code class="code">specialties</code></h4>
 
 <h5 id="description-10">Description</h5>
 
-<p>Returns all specialties in an object as an array of <code>specialties</code>.</p>
+<p>Returns all specialties in an object as an array of <code class="code">specialties</code>.</p>
 
 <h5 id="request-10">Request</h5>
 
@@ -461,11 +544,11 @@ If a <code>specialty</code> or <code>insurance_provider</code> that does not exi
 
 <hr />
 
-<h4 id="getspecialtiesgetapiv1specialtiesspecialtyid">GET <code>specialties</code>: GET /api/v1/specialties/:specialtyID</h4>
+<h4 id="getspecialtiesgetapiv1specialtiesspecialtyid">GET <code class="code">specialties</code>: GET /api/v1/specialties/:specialtyID</h4>
 
 <h5 id="description-11">Description</h5>
 
-<p>Returns single specialty in an object with key <code>specialty</code>.</p>
+<p>Returns single specialty in an object with key <code class="code">specialty</code>.</p>
 
 <h5 id="request-11">Request</h5>
 
@@ -490,11 +573,11 @@ If a <code>specialty</code> or <code>insurance_provider</code> that does not exi
 
 <hr />
 
-<h4 id="postspecialtiesapiv1specialties">POST <code>specialties</code>: /api/v1/specialties</h4>
+<h4 id="postspecialtiesapiv1specialties">POST <code class="code">specialties</code>: /api/v1/specialties</h4>
 
 <h5 id="description-12">Description</h5>
 
-<p>Adds a new specialty to the <code>specialties</code> table. The new specialty's id is returned.</p>
+<p>Adds a new specialty to the <code class="code">specialties</code> table. The new specialty's id is returned.</p>
 
 <h5 id="request-12">Request</h5>
 
@@ -528,11 +611,11 @@ If a <code>specialty</code> or <code>insurance_provider</code> that does not exi
 
 <h3 id="challenges">Challenges</h3>
 
-<h4 id="getchallenges">GET <code>challenges</code></h4>
+<h4 id="getchallenges">GET <code class="code">challenges</code></h4>
 
 <h5 id="description-13">Description</h5>
 
-<p>Returns all challenges in an object as an array of <code>challenges</code>.</p>
+<p>Returns all challenges in an object as an array of <code class="code">challenges</code>.</p>
 
 <h5 id="request-13">Request</h5>
 
@@ -561,11 +644,11 @@ If a <code>specialty</code> or <code>insurance_provider</code> that does not exi
 
 <hr />
 
-<h4 id="getchallengesgetapiv1challengeschallengeid">GET <code>challenges</code>: GET /api/v1/challenges/:challengeID</h4>
+<h4 id="getchallengesgetapiv1challengeschallengeid">GET <code class="code">challenges</code>: GET /api/v1/challenges/:challengeID</h4>
 
 <h5 id="description-14">Description</h5>
 
-<p>Returns single challenge in an object with key <code>challenge</code>.</p>
+<p>Returns single challenge in an object with key <code class="code">challenge</code>.</p>
 
 <h5 id="request-14">Request</h5>
 
@@ -590,11 +673,11 @@ If a <code>specialty</code> or <code>insurance_provider</code> that does not exi
 
 <hr />
 
-<h4 id="postchallengesapiv1challenges">POST <code>challenges</code>: /api/v1/challenges</h4>
+<h4 id="postchallengesapiv1challenges">POST <code class="code">challenges</code>: /api/v1/challenges</h4>
 
 <h5 id="description-15">Description</h5>
 
-<p>Adds a new challenge to the <code>challenges</code> table. The new challenge's id is returned.</p>
+<p>Adds a new challenge to the <code class="code">challenges</code> table. The new challenge's id is returned.</p>
 
 <h5 id="request-15">Request</h5>
 
@@ -628,7 +711,7 @@ If a <code>specialty</code> or <code>insurance_provider</code> that does not exi
 
 <h3 id="favoriteusers">Favorite Users</h3>
 
-<h4 id="getfavoriteusers">GET <code>favoriteUsers</code></h4>
+<h4 id="getfavoriteusers">GET <code class="code">favoriteUsers</code></h4>
 
 <h5 id="description-16">Description</h5>
 
@@ -671,11 +754,11 @@ If a <code>specialty</code> or <code>insurance_provider</code> that does not exi
 
 <hr />
 
-<h4 id="postfavoriteusersapiv1favoriteusersuserid">POST <code>favoriteUsers</code>: /api/v1/favoriteUsers/:userID</h4>
+<h4 id="postfavoriteusersapiv1favoriteusersuserid">POST <code class="code">favoriteUsers</code>: /api/v1/favoriteUsers/:userID</h4>
 
 <h5 id="description-17">Description</h5>
 
-<p>Adds a new favorite user to the <code>favorite_users</code> table. The id's of the user and the favorite user are returned.</p>
+<p>Adds a new favorite user to the <code class="code">favorite_users</code> table. The id's of the user and the favorite user are returned.</p>
 
 <h5 id="request-17">Request</h5>
 
@@ -712,11 +795,11 @@ If a <code>specialty</code> or <code>insurance_provider</code> that does not exi
 
 <hr />
 
-<h4 id="deletefavoriteuserdeleteapiv1favoriteusersuseridfavoriteuserid">DELETE <code>favoriteUser</code>: DELETE /api/v1/favoriteUsers/:userID/:favoriteUserID</h4>
+<h4 id="deletefavoriteuserdeleteapiv1favoriteusersuseridfavoriteuserid">DELETE <code class="code">favoriteUser</code>: DELETE /api/v1/favoriteUsers/:userID/:favoriteUserID</h4>
 
 <h5 id="description-18">Description</h5>
 
-<p>Deletes a favorite user from the <code>favorite_users</code> table.</p>
+<p>Deletes a favorite user from the <code class="code">favorite_users</code> table.</p>
 
 <h5 id="request-18">Request</h5>
 
@@ -735,7 +818,7 @@ If a <code>specialty</code> or <code>insurance_provider</code> that does not exi
 
 <h3 id="favoriteprofessionals">Favorite Professionals</h3>
 
-<h4 id="getfavoriteprofessionals">GET <code>favoriteProfessionals</code></h4>
+<h4 id="getfavoriteprofessionals">GET <code class="code">favoriteProfessionals</code></h4>
 
 <h5 id="description-19">Description</h5>
 
@@ -792,11 +875,11 @@ If a <code>specialty</code> or <code>insurance_provider</code> that does not exi
 
 <hr />
 
-<h4 id="postfavoriteprofessionalsapiv1favoriteprofessionalsuserid">POST <code>favoriteProfessionals</code>: /api/v1/favoriteProfessionals/:userID</h4>
+<h4 id="postfavoriteprofessionalsapiv1favoriteprofessionalsuserid">POST <code class="code">favoriteProfessionals</code>: /api/v1/favoriteProfessionals/:userID</h4>
 
 <h5 id="description-20">Description</h5>
 
-<p>Adds a new favorite professional to the <code>favorite_professionals</code> table. The id's of the user and the favorite professional are returned.</p>
+<p>Adds a new favorite professional to the <code class="code">favorite_professionals</code> table. The id's of the user and the favorite professional are returned.</p>
 
 <h5 id="request-20">Request</h5>
 
@@ -833,11 +916,11 @@ If a <code>specialty</code> or <code>insurance_provider</code> that does not exi
 
 <hr />
 
-<h4 id="deletefavoriteprofessionaldeleteapiv1favoriteprofessionalsuseridfavoriteprofessionalid">DELETE <code>favoriteProfessional</code>: DELETE /api/v1/favoriteProfessionals/:userID/:favoriteProfessionalID</h4>
+<h4 id="deletefavoriteprofessionaldeleteapiv1favoriteprofessionalsuseridfavoriteprofessionalid">DELETE <code class="code">favoriteProfessional</code>: DELETE /api/v1/favoriteProfessionals/:userID/:favoriteProfessionalID</h4>
 
 <h5 id="description-21">Description</h5>
 
-<p>Deletes a favorite professional from the <code>favorite_professionals</code> table.</p>
+<p>Deletes a favorite professional from the <code class="code">favorite_professionals</code> table.</p>
 
 <h5 id="request-21">Request</h5>
 
@@ -853,3 +936,5 @@ If a <code>specialty</code> or <code>insurance_provider</code> that does not exi
 <p>If no favorite professional is found, a 404 error is returned.</p>
 
 <hr />
+</body>
+</html>
