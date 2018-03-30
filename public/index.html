@@ -1,0 +1,855 @@
+<h2 id="endpoints">Endpoints</h2>
+
+<h3 id="users">Users</h3>
+
+<h4 id="getusers">GET <code>users</code></h4>
+
+<h5 id="description">Description</h5>
+
+<p>Returns all users in an object as an array of <code>users</code>.</p>
+
+<h5 id="queryparameters">Query Parameters</h5>
+
+<p>| parameters | data type | description |
+|------------|-----------|-------------|
+| id         | integer   | unique id of user            |
+| user_challenge       | string    | user's mental health challenge            | </p>
+
+<h5 id="request">Request</h5>
+
+<pre><code>GET /api/v1/users
+GET /api/v1/users?user_challenge=OCD
+</code></pre>
+
+<h5 id="return">Return</h5>
+
+<pre><code>{
+    "users": [
+        {
+            "id": 105,
+            "user_name": "Jentastic",
+            "user_image": null,
+            "user_about": "I'm looking to find new ways to cope with my issues.",
+            "user_location": "Denver",
+            "user_email": "jen@email.com",
+            "user_challenges": [
+                "Anxiety",
+                "Depression"
+            ]
+        },
+        {
+            "id": 106,
+            "user_name": "Dan",
+            "user_image": null,
+            "user_about": "i'm sad.",
+            "user_location": "Denver",
+            "user_email": "dan@email.com",
+            "user_challenges": [
+                "Anxiety",
+                "Bipolar",
+                "Claustrophobia"
+            ]
+        },
+  ...
+}
+</code></pre>
+
+<h5 id="errors">Errors</h5>
+
+<p>If no users are found, a 404 error is returned. If a <code>user_challenge</code> that does not exist in the challenges table is sent as a parameter, a 500 error is returned.</p>
+
+<hr />
+
+<h4 id="getusersapiv1usersid">GET <code>users</code>: /api/v1/users/:id</h4>
+
+<h5 id="description-1">Description</h5>
+
+<p>Returns single user in an object as an array of <code>users</code>.</p>
+
+<h5 id="request-1">Request</h5>
+
+<pre><code>GET /api/v1/users/105
+</code></pre>
+
+<h5 id="return-1">Return</h5>
+
+<pre><code>{
+    "users": [
+        {
+            "id": 105,
+            "user_name": "Jentastic",
+            "user_image": null,
+            "user_about": "I'm looking to find new ways to cope with my issues.",
+            "user_location": "Denver",
+            "user_email": "jen@email.com",
+            "user_challenges": [
+                "Anxiety",
+                "Depression"
+            ]
+        }
+    ]
+}
+</code></pre>
+
+<h5 id="errors-1">Errors</h5>
+
+<p>If no user is found, a 404 error is returned. </p>
+
+<hr />
+
+<h4 id="postusersapiv1users">POST <code>users</code>: /api/v1/users</h4>
+
+<h5 id="description-2">Description</h5>
+
+<p>Adds a new user to the <code>users</code> table and adds any challenges to the <code>user_challenges</code> table. The new user's id is returned.</p>
+
+<h5 id="request-2">Request</h5>
+
+<pre><code>POST /api/v1/users
+</code></pre>
+
+<h6 id="body">Body</h6>
+
+<p>The "user_name" property is required. Other properties are optional.</p>
+
+<pre><code>{
+    "user_name": "Jen",
+      "user_about": "I'm looking to find new ways to cope with my issues.",
+      "user_location": "Denver",
+      "user_email": "jen@email.com",
+    "user_challenges": ["Depression"]
+
+}
+</code></pre>
+
+<h5 id="return-2">Return</h5>
+
+<pre><code>{
+    "id": 108
+}
+</code></pre>
+
+<h5 id="errors-2">Errors</h5>
+
+<p>If the user_name property is omitted, a 422 error is returned.
+If a <code>user_challenge</code> that does not exist in the challenges table is sent in the body, a 500 error is returned.</p>
+
+<hr />
+
+<h4 id="patchusersapiv1usersuserid">PATCH <code>users</code>: /api/v1/users/:userID</h4>
+
+<h5 id="description-3">Description</h5>
+
+<p>Update a user in the <code>users</code> table and any associated user_challenges in the <code>user_challenges</code> table. The new user is returned.</p>
+
+<h5 id="request-3">Request</h5>
+
+<pre><code>PATCH /api/v1/users/:userID
+</code></pre>
+
+<h6 id="body-1">Body</h6>
+
+<pre><code>{
+          "user_name": "Jen",
+          "user_about": "I'm looking to find new ways to cope with my issues.",
+          "user_location": "Denver",
+          "user_email": "jen@email.com",
+          "user_challenges": ["Depression"]
+        }
+</code></pre>
+
+<h5 id="return-3">Return</h5>
+
+<pre><code>{
+    "user": {
+        "id": 106,
+        "user_name": "Jen",
+        "user_image": null,
+        "user_about": "I'm looking to find new ways to cope with my issues.",
+        "user_location": "Denver",
+        "user_email": "nevin.jennifer@gmail.com",
+        "user_challenges": [
+            "Depression"
+        ]
+    }
+}
+</code></pre>
+
+<h5 id="errors-3">Errors</h5>
+
+<p>If the user to be updated cannot be found, a 404 error is returned.</p>
+
+<hr />
+
+<h3 id="professionals">Professionals</h3>
+
+<h4 id="getprofessionals">GET <code>professionals</code></h4>
+
+<h5 id="description-4">Description</h5>
+
+<p>Returns all professionals in an object as an array of <code>professionals</code>.</p>
+
+<h5 id="queryparameters-1">Query Parameters</h5>
+
+<p>| parameters | data type | description |
+|------------|-----------|-------------|
+| id         | integer   | unique id of user            |
+| specialty       | string    | professional's specialty            |
+| insurance_provider       | string    | insurance accepted by professional            | </p>
+
+<h5 id="request-4">Request</h5>
+
+<pre><code>GET /api/v1/professionals
+GET /api/v1/professionals?specialty=LGBTQ
+GET /api/v1/professionals?insurance_provider=BCBS
+</code></pre>
+
+<h5 id="return-4">Return</h5>
+
+<pre><code>{
+    "professionals": [
+        {
+            "id": 78,
+            "professional_name": "Dr. Smith",
+            "professional_image": null,
+            "professional_location": "Denver",
+            "professional_email": "smith@email.com",
+            "professional_phone": "555-555-1234",
+            "professional_insurance_providers": [
+                "Aetna"
+            ],
+            "professional_specialties": [
+                "Addiction"
+            ]
+        },
+        {
+            "id": 79,
+            "professional_name": "Dr. Johnson",
+            "professional_image": null,
+            "professional_location": "Denver",
+            "professional_email": "johnson@email.com",
+            "professional_phone": "555-555-1111",
+            "professional_insurance_providers": [
+                "Kaiser",
+                "Humana"
+            ],
+            "professional_specialties": [
+                "Families",
+                "Careers"
+            ]
+        },
+  ...
+}
+</code></pre>
+
+<h5 id="errors-4">Errors</h5>
+
+<p>If no professionals are found, a 404 error is returned. If a <code>specialty</code> or <code>insurance_provider</code> that does not exist in the specialties/insurance_providers tables is sent as a parameter, a 500 error is returned.</p>
+
+<hr />
+
+<h4 id="getprofessionalsgetapiv1professionalsprofessionalid">GET <code>professionals</code>: GET /api/v1/professionals/:professionalID</h4>
+
+<h5 id="description-5">Description</h5>
+
+<p>Returns single professional in an object with key <code>professional</code>.</p>
+
+<h5 id="request-5">Request</h5>
+
+<pre><code>GET /api/v1/professionals/78
+</code></pre>
+
+<h5 id="return-5">Return</h5>
+
+<pre><code>{
+    "professional": {
+        "professional_insurance_providers": [
+            "Aetna"
+        ],
+        "professional_specialties": [
+            "Addiction"
+        ],
+        "id": 78,
+        "professional_name": "Dr. Smith",
+        "professional_image": null,
+        "professional_location": "Denver",
+        "professional_email": null,
+        "professional_phone": "555-555-1234"
+    }
+}
+</code></pre>
+
+<h5 id="errors-5">Errors</h5>
+
+<p>If no professional is found, a 404 error is returned. </p>
+
+<hr />
+
+<h4 id="postprofessionalsapiv1professionals">POST <code>professionals</code>: /api/v1/professionals</h4>
+
+<h5 id="description-6">Description</h5>
+
+<p>Adds a new professional to the <code>professionals</code> table and adds any specialtys to the <code>professional_specialties</code> table and insurance providers to the <code>insurance_providers</code> table. The new professional's id is returned.</p>
+
+<h5 id="request-6">Request</h5>
+
+<pre><code>POST /api/v1/professionals
+</code></pre>
+
+<h6 id="body-2">Body</h6>
+
+<p>The "professional<em>name" and "professional</em>location" properties are required. Other properties are optional.</p>
+
+<pre><code>{
+    "professional_name": "Dr. Dan",
+    "professional_location": "Denver",
+    "professional_email": "dan@email.com",
+    "professional_phone":   "555-555-5555",
+    "professional_insurance_providers": ["Aetna", "BCBS"],
+    "professional_specialties": ["Couples"]
+}
+</code></pre>
+
+<h5 id="return-6">Return</h5>
+
+<pre><code>{
+    "id": [
+        90
+    ]
+}
+</code></pre>
+
+<h5 id="errors-6">Errors</h5>
+
+<p>If the professional<em>name or professional</em>location property is omitted, a 422 error is returned.
+If a <code>specialty</code> or <code>insurance_provider</code> that does not exist in the specialties/insurance_providers tables is sent in the body, a 500 error is returned.</p>
+
+<hr />
+
+<h3 id="insuranceproviders">Insurance Providers</h3>
+
+<h4 id="getinsuranceproviders">GET <code>insuranceProviders</code></h4>
+
+<h5 id="description-7">Description</h5>
+
+<p>Returns all insurance providers in an object as an array of <code>insuranceProviders</code>.</p>
+
+<h5 id="request-7">Request</h5>
+
+<pre><code>GET /api/v1/insuranceProviders
+</code></pre>
+
+<h5 id="return-7">Return</h5>
+
+<pre><code>{
+    "insuranceProviders": [
+        {
+            "id": 41,
+            "insurance_provider_name": "Aetna",
+            "created_at": "2018-01-08T23:45:00.471Z",
+            "updated_at": "2018-01-08T23:45:00.471Z"
+        },
+        {
+            "id": 42,
+            "insurance_provider_name": "BCBS",
+            "created_at": "2018-01-08T23:45:00.471Z",
+            "updated_at": "2018-01-08T23:45:00.471Z"
+        },
+  ...
+}
+</code></pre>
+
+<hr />
+
+<h4 id="getinsuranceprovidersgetapiv1insuranceprovidersinsuranceproviderid">GET <code>insuranceProviders</code>: GET /api/v1/insuranceProviders/:insuranceProviderID</h4>
+
+<h5 id="description-8">Description</h5>
+
+<p>Returns single insurance provider in an object with key <code>insuranceProvider</code>.</p>
+
+<h5 id="request-8">Request</h5>
+
+<pre><code>GET /api/v1/insuranceProviders/41
+</code></pre>
+
+<h5 id="return-8">Return</h5>
+
+<pre><code>{
+    "insuranceProvider": {
+        "id": 41,
+        "insurance_provider_name": "Aetna",
+        "created_at": "2018-01-08T23:45:00.471Z",
+        "updated_at": "2018-01-08T23:45:00.471Z"
+    }
+}
+</code></pre>
+
+<h5 id="errors-7">Errors</h5>
+
+<p>If no insurance provider is found, a 404 error is returned.</p>
+
+<hr />
+
+<h4 id="postinsuranceprovidersapiv1insuranceproviders">POST <code>insuranceProviders</code>: /api/v1/insuranceProviders</h4>
+
+<h5 id="description-9">Description</h5>
+
+<p>Adds a new insurance provider to the <code>insurance_providers</code> table. The new insurance provider's id is returned.</p>
+
+<h5 id="request-9">Request</h5>
+
+<pre><code>POST /api/v1/insuranceProviders
+</code></pre>
+
+<h6 id="body-3">Body</h6>
+
+<p>The "insurance<em>provider</em>name" property is required.</p>
+
+<pre><code>{
+    "insurance_provider_name": "Humana"
+
+}
+</code></pre>
+
+<h5 id="return-9">Return</h5>
+
+<pre><code>{
+    "id": [
+        51
+    ]
+}
+</code></pre>
+
+<h5 id="errors-8">Errors</h5>
+
+<p>If the insurance<em>provider</em>name property is omitted, a 422 error is returned.</p>
+
+<hr />
+
+<h3 id="specialties">Specialties</h3>
+
+<h4 id="getspecialties">GET <code>specialties</code></h4>
+
+<h5 id="description-10">Description</h5>
+
+<p>Returns all specialties in an object as an array of <code>specialties</code>.</p>
+
+<h5 id="request-10">Request</h5>
+
+<pre><code>GET /api/v1/specialties
+</code></pre>
+
+<h5 id="return-10">Return</h5>
+
+<pre><code>{
+    "specialties": [
+        {
+            "id": 41,
+            "specialty_name": "Addiction",
+            "created_at": "2018-01-08T23:45:00.473Z",
+            "updated_at": "2018-01-08T23:45:00.473Z"
+        },
+        {
+            "id": 42,
+            "specialty_name": "Careers",
+            "created_at": "2018-01-08T23:45:00.473Z",
+            "updated_at": "2018-01-08T23:45:00.473Z"
+        },
+  ...
+}
+</code></pre>
+
+<hr />
+
+<h4 id="getspecialtiesgetapiv1specialtiesspecialtyid">GET <code>specialties</code>: GET /api/v1/specialties/:specialtyID</h4>
+
+<h5 id="description-11">Description</h5>
+
+<p>Returns single specialty in an object with key <code>specialty</code>.</p>
+
+<h5 id="request-11">Request</h5>
+
+<pre><code>GET /api/v1/specialties/41
+</code></pre>
+
+<h5 id="return-11">Return</h5>
+
+<pre><code>{
+    "specialty": {
+        "id": 41,
+        "specialty_name": "Addiction",
+        "created_at": "2018-01-08T23:45:00.473Z",
+        "updated_at": "2018-01-08T23:45:00.473Z"
+    }
+}
+</code></pre>
+
+<h5 id="errors-9">Errors</h5>
+
+<p>If no specialty is found, a 404 error is returned.</p>
+
+<hr />
+
+<h4 id="postspecialtiesapiv1specialties">POST <code>specialties</code>: /api/v1/specialties</h4>
+
+<h5 id="description-12">Description</h5>
+
+<p>Adds a new specialty to the <code>specialties</code> table. The new specialty's id is returned.</p>
+
+<h5 id="request-12">Request</h5>
+
+<pre><code>POST /api/v1/specialties
+</code></pre>
+
+<h6 id="body-4">Body</h6>
+
+<p>The "specialty_name" property is required.</p>
+
+<pre><code>{
+    "specialty_name": "PTSD"
+
+}
+</code></pre>
+
+<h5 id="return-12">Return</h5>
+
+<pre><code>{
+    "id": [
+        51
+    ]
+}
+</code></pre>
+
+<h5 id="errors-10">Errors</h5>
+
+<p>If the specialty_name property is omitted, a 422 error is returned.</p>
+
+<hr />
+
+<h3 id="challenges">Challenges</h3>
+
+<h4 id="getchallenges">GET <code>challenges</code></h4>
+
+<h5 id="description-13">Description</h5>
+
+<p>Returns all challenges in an object as an array of <code>challenges</code>.</p>
+
+<h5 id="request-13">Request</h5>
+
+<pre><code>GET /api/v1/challenges
+</code></pre>
+
+<h5 id="return-13">Return</h5>
+
+<pre><code>{
+    "challenges": [
+        {
+            "id": 41,
+            "challenge_name": "Agoraphobia",
+            "created_at": "2018-01-08T23:45:00.467Z",
+            "updated_at": "2018-01-08T23:45:00.467Z"
+        },
+        {
+            "id": 42,
+            "challenge_name": "Anorexia",
+            "created_at": "2018-01-08T23:45:00.467Z",
+            "updated_at": "2018-01-08T23:45:00.467Z"
+        },
+  ...
+}
+</code></pre>
+
+<hr />
+
+<h4 id="getchallengesgetapiv1challengeschallengeid">GET <code>challenges</code>: GET /api/v1/challenges/:challengeID</h4>
+
+<h5 id="description-14">Description</h5>
+
+<p>Returns single challenge in an object with key <code>challenge</code>.</p>
+
+<h5 id="request-14">Request</h5>
+
+<pre><code>GET /api/v1/challenges/41
+</code></pre>
+
+<h5 id="return-14">Return</h5>
+
+<pre><code>{
+    "challenge": {
+        "id": 41,
+        "challenge_name": "Agoraphobia",
+        "created_at": "2018-01-08T23:45:00.467Z",
+        "updated_at": "2018-01-08T23:45:00.467Z"
+    }
+}
+</code></pre>
+
+<h5 id="errors-11">Errors</h5>
+
+<p>If no challenge is found, a 404 error is returned.</p>
+
+<hr />
+
+<h4 id="postchallengesapiv1challenges">POST <code>challenges</code>: /api/v1/challenges</h4>
+
+<h5 id="description-15">Description</h5>
+
+<p>Adds a new challenge to the <code>challenges</code> table. The new challenge's id is returned.</p>
+
+<h5 id="request-15">Request</h5>
+
+<pre><code>POST /api/v1/challenges
+</code></pre>
+
+<h6 id="body-5">Body</h6>
+
+<p>The "challenge_name" property is required.</p>
+
+<pre><code>{
+    "challenge_name": "ADHD"
+
+}
+</code></pre>
+
+<h5 id="return-15">Return</h5>
+
+<pre><code>{
+    "id": [
+        51
+    ]
+}
+</code></pre>
+
+<h5 id="errors-12">Errors</h5>
+
+<p>If the challenge_name property is omitted, a 422 error is returned.</p>
+
+<hr />
+
+<h3 id="favoriteusers">Favorite Users</h3>
+
+<h4 id="getfavoriteusers">GET <code>favoriteUsers</code></h4>
+
+<h5 id="description-16">Description</h5>
+
+<p>Returns all favorite users for a user based on the user's id.</p>
+
+<h5 id="request-16">Request</h5>
+
+<pre><code>GET /api/v1/favoriteUsers/105
+</code></pre>
+
+<h5 id="return-16">Return</h5>
+
+<pre><code>{
+    "favoriteUsers": [
+        {
+            "id": 107,
+            "user_name": "Holly",
+            "user_image": null,
+            "user_about": "Hey, I'm Holly.",
+            "user_location": "Denver",
+            "user_email": "holly@gmail.com",
+            "user_challenges": ["OCD", "Anxiety"]
+        },
+    {
+            "id": 120,
+            "user_name": "Lily",
+            "user_image": null,
+            "user_about": "Help!",
+            "user_location": "Denver",
+            "user_email": "lily@gmail.com",
+            "user_challenges": ["Depression"]
+        },
+  ...
+}
+</code></pre>
+
+<h5 id="errors-13">Errors</h5>
+
+<p>If no users are found, a 404 error is returned.</p>
+
+<hr />
+
+<h4 id="postfavoriteusersapiv1favoriteusersuserid">POST <code>favoriteUsers</code>: /api/v1/favoriteUsers/:userID</h4>
+
+<h5 id="description-17">Description</h5>
+
+<p>Adds a new favorite user to the <code>favorite_users</code> table. The id's of the user and the favorite user are returned.</p>
+
+<h5 id="request-17">Request</h5>
+
+<pre><code>POST /api/v1/favoriteUsers/105
+</code></pre>
+
+<h6 id="body-6">Body</h6>
+
+<p>The "favoriteUserID" property is required.</p>
+
+<pre><code>{
+    "favoriteUserID": "108"
+
+}
+</code></pre>
+
+<h5 id="return-17">Return</h5>
+
+<pre><code>{
+    "favoriteUser": [
+        {
+            "user_id": 105,
+            "favorite_user_id": 108,
+            "created_at": "2018-01-09T18:17:49.901Z",
+            "updated_at": "2018-01-09T18:17:49.901Z"
+        }
+    ]
+}
+</code></pre>
+
+<h5 id="errors-14">Errors</h5>
+
+<p>If the favoriteUserID property is omitted, a 422 error is returned.</p>
+
+<hr />
+
+<h4 id="deletefavoriteuserdeleteapiv1favoriteusersuseridfavoriteuserid">DELETE <code>favoriteUser</code>: DELETE /api/v1/favoriteUsers/:userID/:favoriteUserID</h4>
+
+<h5 id="description-18">Description</h5>
+
+<p>Deletes a favorite user from the <code>favorite_users</code> table.</p>
+
+<h5 id="request-18">Request</h5>
+
+<pre><code>DELETE /api/v1/favoriteUsers/105/108
+</code></pre>
+
+<h5 id="return-18">Return</h5>
+
+<p>Status code 204.</p>
+
+<h5 id="errors-15">Errors</h5>
+
+<p>If no favorite user is found, a 404 error is returned.</p>
+
+<hr />
+
+<h3 id="favoriteprofessionals">Favorite Professionals</h3>
+
+<h4 id="getfavoriteprofessionals">GET <code>favoriteProfessionals</code></h4>
+
+<h5 id="description-19">Description</h5>
+
+<p>Returns all favorite professionals for a user based on the user's id.</p>
+
+<h5 id="request-19">Request</h5>
+
+<pre><code>GET /api/v1/favoriteProfessionals/105
+</code></pre>
+
+<h5 id="return-19">Return</h5>
+
+<pre><code>{
+    "favoriteProfessionals": [
+        {
+            "id": 79,
+            "professional_name": "Dr. Johnson",
+            "professional_image": null,
+            "professional_location": "Denver",
+            "professional_email": "johnson@email.com",
+            "professional_phone": "555-555-1111",
+            "professional_insurance_providers": [
+                "Humana",
+                "Kaiser"
+            ],
+            "professional_specialties": [
+                "Families",
+                "Careers"
+            ]
+        },
+    {
+            "id": 95,
+            "professional_name": "Dr. Williams",
+            "professional_image": null,
+            "professional_location": "Denver",
+            "professional_email": "williams@email.com,
+            "professional_phone": "555-555-1911",
+            "professional_insurance_providers": [
+                "Humana"
+            ],
+            "professional_specialties": [
+                "Families",
+                "Careers",
+        "Veterans"
+            ]
+        },
+  ...
+}
+</code></pre>
+
+<h5 id="errors-16">Errors</h5>
+
+<p>If no professionals are found, a 404 error is returned.</p>
+
+<hr />
+
+<h4 id="postfavoriteprofessionalsapiv1favoriteprofessionalsuserid">POST <code>favoriteProfessionals</code>: /api/v1/favoriteProfessionals/:userID</h4>
+
+<h5 id="description-20">Description</h5>
+
+<p>Adds a new favorite professional to the <code>favorite_professionals</code> table. The id's of the user and the favorite professional are returned.</p>
+
+<h5 id="request-20">Request</h5>
+
+<pre><code>POST /api/v1/favoriteProfessionals/105
+</code></pre>
+
+<h6 id="body-7">Body</h6>
+
+<p>The "favoriteProfessionalID" property is required.</p>
+
+<pre><code>{
+    "favoriteProfessionalID": "108"
+
+}
+</code></pre>
+
+<h5 id="return-20">Return</h5>
+
+<pre><code>{
+    "favoriteProfessional": [
+        {
+            "user_id": 105,
+            "favorite_professional_id": 79,
+            "created_at": "2018-01-09T18:20:52.022Z",
+            "updated_at": "2018-01-09T18:20:52.022Z"
+        }
+    ]
+}
+</code></pre>
+
+<h5 id="errors-17">Errors</h5>
+
+<p>If the favoriteProfessionalID property is omitted, a 422 error is returned.</p>
+
+<hr />
+
+<h4 id="deletefavoriteprofessionaldeleteapiv1favoriteprofessionalsuseridfavoriteprofessionalid">DELETE <code>favoriteProfessional</code>: DELETE /api/v1/favoriteProfessionals/:userID/:favoriteProfessionalID</h4>
+
+<h5 id="description-21">Description</h5>
+
+<p>Deletes a favorite professional from the <code>favorite_professionals</code> table.</p>
+
+<h5 id="request-21">Request</h5>
+
+<pre><code>DELETE /api/v1/favoriteProfessionals/105/79
+</code></pre>
+
+<h5 id="return-21">Return</h5>
+
+<p>Status code 204.</p>
+
+<h5 id="errors-18">Errors</h5>
+
+<p>If no favorite professional is found, a 404 error is returned.</p>
+
+<hr />
