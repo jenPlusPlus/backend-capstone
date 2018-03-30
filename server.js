@@ -42,7 +42,7 @@ app.use(express.static(__dirname + '/public'));
 
 
 const saveImage = (req, res) => {
-  console.log('saveImage request : ', req, '\n\n\n\n\n');
+  // console.log('saveImage request : ', req, '\n\n\n\n\n');
   // let form = new multiparty.Form();
   //
   // form.parse(req, (error, fields, files) => {
@@ -228,8 +228,8 @@ app.get('/api/v1/users', (request, response) => {
   }
 });
 
-app.post('/api/v1/users', saveImage, (request, response) => {
-  console.log('post request: ', request, '\n\n\n\n\n');
+app.post('/api/v1/users', (request, response) => {
+//  console.log('post request: ', request, '\n\n\n\n\n');
   const { user_name, user_image, user_about, user_location, user_email, user_challenges } = request.body;
 
   const user = { user_name, user_image, user_about, user_location, user_email };
